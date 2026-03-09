@@ -122,6 +122,14 @@
         <div id="khuVucAdmin" class="vung-admin an-di">
             <h3 style="margin-top: 0;">Khu Vực Quản Trị</h3>
             
+            <datalist id="danhSachVaiTro">
+                <option value="Nhân viên"></option>
+                <option value="Hiệu trưởng"></option>
+                <option value="P. Hiệu trưởng"></option>
+                <option value="Tổ trưởng"></option>
+                <option value="Trưởng ban"></option>
+            </datalist>
+
             <div class="thanh-tab-admin">
                 <button class="tab-admin actived" data-tab="tabChung">Cài Đặt & Dữ Liệu</button>
                 <button class="tab-admin" data-tab="tabPhongBan" id="nutTabPhongBan">Phòng Ban</button>
@@ -175,13 +183,7 @@
                         <input type="text" id="tenNhanVienMoi" placeholder="Họ và tên nhân viên">
                         <input type="text" id="chuoiDangNhapMoi" placeholder="Chuỗi ID (VD: ketoan)">
                         <input type="text" id="pinMacDinh" placeholder="PIN mặc định (4 số, VD: 0000)" maxlength="4">
-                        <select id="vaiTroMoi">
-                            <option value="nhan_vien">Vai trò: Nhân viên</option>
-                            <option value="hieu_truong">Vai trò: Hiệu trưởng</option>
-                            <option value="p_hieu_truong">Vai trò: P. Hiệu trưởng</option>
-                            <option value="to_truong">Vai trò: Tổ trưởng</option>
-                            <option value="truong_ban">Vai trò: Trưởng ban</option>
-                        </select>
+                        <input type="text" id="vaiTroMoi" list="danhSachVaiTro" placeholder="Vai trò (để trống hoặc tự nhập)">
                         <button id="nutTaoTaiKhoan" style="background-color: #2196F3;">Tạo Tài Khoản</button>
                         <p id="thongBaoTaoTK" style="color: green; font-size: 13px;"></p>
 
@@ -199,13 +201,7 @@
                         <input type="text" id="suaTenNhanVien" placeholder="Họ và tên mới">
                         <input type="text" id="suaChuoiDangNhap" placeholder="Chuỗi ID mới">
                         <input type="text" id="suaPin" placeholder="PIN mới (4 số)" maxlength="4">
-                        <select id="suaVaiTroNhanVien">
-                            <option value="nhan_vien">Vai trò: Nhân viên</option>
-                            <option value="hieu_truong">Vai trò: Hiệu trưởng</option>
-                            <option value="p_hieu_truong">Vai trò: P. Hiệu trưởng</option>
-                            <option value="to_truong">Vai trò: Tổ trưởng</option>
-                            <option value="truong_ban">Vai trò: Trưởng ban</option>
-                        </select>
+                        <input type="text" id="suaVaiTroNhanVien" list="danhSachVaiTro" placeholder="Vai trò (để trống hoặc tự nhập)">
                         <div style="display: flex; gap: 10px;">
                             <button id="nutSuaTaiKhoan" style="background-color: #ff9800; flex: 1;">Cập Nhật</button>
                             <button id="nutXoaTaiKhoan" class="nut-huy" style="flex: 1;">Xóa</button>
@@ -339,7 +335,8 @@
     // Các hàm Helper Quản lý Vai trò
     function kiemTraQuanLy(u) {
         if (!u) return false;
-        return u.laTruongPhong === true || ['hieu_truong', 'p_hieu_truong', 'to_truong', 'truong_ban'].includes(u.vaiTro);
+        const cacVaiTroQuanLy = ['hieu_truong', 'p_hieu_truong', 'to_truong', 'truong_ban', 'Hiệu trưởng', 'P. Hiệu trưởng', 'Tổ trưởng', 'Trưởng ban'];
+        return u.laTruongPhong === true || cacVaiTroQuanLy.includes(u.vaiTro);
     }
     
     function layTenVaiTro(u) {
@@ -348,15 +345,17 @@
         if (u.vaiTro === 'p_hieu_truong') return 'P. Hiệu trưởng';
         if (u.vaiTro === 'to_truong') return 'Tổ trưởng';
         if (u.vaiTro === 'truong_ban') return 'Trưởng ban';
+        if (u.vaiTro === 'nhan_vien') return 'Nhân viên';
         if (u.laTruongPhong) return 'Quản lý'; 
+        if (u.vaiTro && u.vaiTro.trim() !== "") return u.vaiTro; 
         return 'Nhân viên';
     }
 
     function layVietTatVaiTro(u) {
-        if (u.vaiTro === 'hieu_truong') return ' (HT)';
-        if (u.vaiTro === 'p_hieu_truong') return ' (PHT)';
-        if (u.vaiTro === 'to_truong') return ' (TT)';
-        if (u.vaiTro === 'truong_ban') return ' (TB)';
+        if (u.vaiTro === 'hieu_truong' || u.vaiTro === 'Hiệu trưởng') return ' (HT)';
+        if (u.vaiTro === 'p_hieu_truong' || u.vaiTro === 'P. Hiệu trưởng') return ' (PHT)';
+        if (u.vaiTro === 'to_truong' || u.vaiTro === 'Tổ trưởng') return ' (TT)';
+        if (u.vaiTro === 'truong_ban' || u.vaiTro === 'Trưởng ban') return ' (TB)';
         if (u.laTruongPhong) return ' (QL)';
         return '';
     }
@@ -633,7 +632,7 @@
         const ten = document.getElementById('suaTenNhanVien').value;
         const chuoi = document.getElementById('suaChuoiDangNhap').value;
         const pin = document.getElementById('suaPin').value;
-        const vaitro = document.getElementById('suaVaiTroNhanVien').value;
+        const vaitro = document.getElementById('suaVaiTroNhanVien').value.trim();
         const tb = document.getElementById('thongBaoSuaTK');
 
         if (!id || !ten || !chuoi || !pbIdMoi) { alert("Vui lòng điền đủ tên, chuỗi ID và chọn phòng ban trực thuộc."); return; }
@@ -662,6 +661,7 @@
                 document.getElementById('suaChuoiDangNhap').value = "";
                 document.getElementById('suaPin').value = "";
                 document.getElementById('suaPhongBanNhanVien').value = "";
+                document.getElementById('suaVaiTroNhanVien').value = "";
                 await taiDanhSachTatCaTaiKhoan();
                 hienThiDropdownSuaTaiKhoan();
             } catch(e) { alert("Lỗi khi xóa tài khoản"); }
@@ -688,13 +688,22 @@
             document.getElementById('suaTenNhanVien').value = tk.ten || "";
             document.getElementById('suaChuoiDangNhap').value = tk.tenDangNhap || "";
             document.getElementById('suaPin').value = tk.maPin || "";
-            document.getElementById('suaVaiTroNhanVien').value = tk.vaiTro || (tk.laTruongPhong ? "to_truong" : "nhan_vien");
+            
+            let vt = tk.vaiTro || "";
+            if (vt === 'nhan_vien') vt = ""; 
+            else if (vt === 'hieu_truong') vt = "Hiệu trưởng";
+            else if (vt === 'p_hieu_truong') vt = "P. Hiệu trưởng";
+            else if (vt === 'to_truong') vt = "Tổ trưởng";
+            else if (vt === 'truong_ban') vt = "Trưởng ban";
+            document.getElementById('suaVaiTroNhanVien').value = vt;
+            
             document.getElementById('thongBaoSuaTK').innerText = "";
         } else {
             document.getElementById('suaPhongBanNhanVien').value = "";
             document.getElementById('suaTenNhanVien').value = "";
             document.getElementById('suaChuoiDangNhap').value = "";
             document.getElementById('suaPin').value = "";
+            document.getElementById('suaVaiTroNhanVien').value = "";
         }
     }
 
@@ -808,7 +817,7 @@
         const ten = document.getElementById('tenNhanVienMoi').value;
         const chuoiID = document.getElementById('chuoiDangNhapMoi').value;
         const pin = document.getElementById('pinMacDinh').value;
-        const vaitro = document.getElementById('vaiTroMoi').value;
+        const vaitro = document.getElementById('vaiTroMoi').value.trim();
 
         if (!pbId || !ten || !chuoiID || pin.length !== 4) { alert("Vui lòng nhập đủ thông tin và PIN 4 số."); return; }
         
@@ -819,6 +828,7 @@
             document.getElementById('thongBaoTaoTK').innerText = `Đã tạo: ${chuoiID}${pin}`;
             document.getElementById('tenNhanVienMoi').value = "";
             document.getElementById('chuoiDangNhapMoi').value = "";
+            document.getElementById('vaiTroMoi').value = "";
             
             await taiDanhSachTatCaTaiKhoan(); hienThiDropdownSuaTaiKhoan();
         } catch (loi) {}
@@ -850,17 +860,12 @@
                     let pin = tk.MaPin || tk.mapin || tk.PIN || tk["Mã PIN"];
                     
                     let vtTxt = tk.VaiTro || tk.vaitro || tk["Vai trò"] || tk["Vai Trò"] || "";
-                    let vaiTroLuu = "nhan_vien";
-                    vtTxt = vtTxt.toString().trim().toUpperCase();
-                    if (vtTxt === "HT") vaiTroLuu = "hieu_truong";
-                    else if (vtTxt === "PHT") vaiTroLuu = "p_hieu_truong";
-                    else if (vtTxt === "TT") vaiTroLuu = "to_truong";
-                    else if (vtTxt === "TB") vaiTroLuu = "truong_ban";
-                    
-                    let laTP = tk.TruongPhong || tk.truongphong || tk["Trưởng phòng"] || tk["Trưởng Phòng"];
-                    if (laTP === "x" || laTP === "X" || laTP === "1" || laTP === 1 || laTP === true) {
-                        vaiTroLuu = "to_truong"; 
-                    }
+                    let vaiTroLuu = vtTxt.toString().trim();
+                    let vtUpper = vaiTroLuu.toUpperCase();
+                    if (vtUpper === "HT") vaiTroLuu = "Hiệu trưởng";
+                    else if (vtUpper === "PHT") vaiTroLuu = "P. Hiệu trưởng";
+                    else if (vtUpper === "TT") vaiTroLuu = "Tổ trưởng";
+                    else if (vtUpper === "TB") vaiTroLuu = "Trưởng ban";
 
                     if (ten && chuoiID && pin) {
                         let pinChuoi = pin.toString().padStart(4, '0');
