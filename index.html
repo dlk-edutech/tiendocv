@@ -19,6 +19,10 @@
         .nut-huy:hover { background-color: #da190b; }
         .nut-nho { padding: 5px 10px; font-size: 12px; margin-right: 5px; }
         
+        /* Popup Modal */
+        .nen-mo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; display: flex; align-items: center; justify-content: center; }
+        .popup-dang-nhap { background: white; padding: 25px; border-radius: 8px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+
         /* Lưới công việc */
         .danh-sach-cv { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
         .the-cong-viec { padding: 15px; border-radius: 6px; border: 1px solid #ddd; background: #fff; position: relative; }
@@ -48,53 +52,73 @@
 </head>
 <body>
 
-<div class="khung-chinh">
-    <div id="manHinhDangNhap">
-        <h2 id="tieuDeDangNhap">Đăng Nhập</h2>
-        <p>Vui lòng nhập chuỗi đăng nhập (Admin: dãy số, User: Chuỗi + 4 số PIN)</p>
+<div id="modalDangNhap" class="nen-mo an-di">
+    <div class="popup-dang-nhap">
+        <h2 style="margin-top: 0;">Đăng Nhập</h2>
+        <p style="font-size: 14px; color: #555;">(Admin: dãy số, User: Chuỗi + 4 số PIN)</p>
         <input type="text" id="oNhapTaiKhoan" placeholder="Nhập tài khoản">
-        <button id="nutDangNhap">Đăng Nhập</button>
-        <p id="thongBaoDangNhap" style="color: red; font-weight: bold;"></p>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button id="nutDangNhap" style="flex: 1;">Xác nhận</button>
+            <button id="nutDongDangNhap" class="nut-huy" style="flex: 1;">Đóng</button>
+        </div>
+        <p id="thongBaoDangNhap" style="color: red; font-weight: bold; margin-bottom: 0;"></p>
     </div>
+</div>
 
-    <div id="manHinhChinh" class="an-di">
+<div class="khung-chinh">
+    <div id="manHinhChinh">
         <div class="thanh-cong-cu">
             <div>
-                <span id="tenNguoiDungHienTai">Xin chào, </span>
+                <span id="tenNguoiDungHienTai">Khách (Chỉ xem)</span>
                 <span id="tenPhongBanHienTai" style="font-weight: bold; color: #2196F3; margin-left: 10px;"></span>
             </div>
             <div>
-                <button id="nutDoiPin" class="nut-nho" style="background-color: #ff9800;">Đổi thông tin</button>
-                <button id="nutDangXuat" class="nut-nho nut-huy">Đăng Xuất</button>
+                <button id="nutMoDangNhap" class="nut-nho" style="background-color: #2196F3;">Đăng Nhập</button>
+                <button id="nutDoiPin" class="nut-nho an-di" style="background-color: #ff9800;">Đổi thông tin</button>
+                <button id="nutDangXuat" class="nut-nho nut-huy an-di">Đăng Xuất</button>
             </div>
         </div>
 
         <div id="khuVucAdmin" class="vung-admin an-di">
-            <h3>Khu Vực Quản Trị Hệ Thống</h3>
-            <div style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <h4>Tạo Phòng Ban</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin-top: 0;">Khu Vực Quản Trị Hệ Thống</h3>
+                <button id="nutXuatExcelCongViec" class="nut-nho" style="background-color: #4CAF50;">Tải Excel Toàn Bộ Công Việc</button>
+            </div>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h4>1. Quản Lý Phòng Ban</h4>
                     <input type="text" id="tenPhongBanMoi" placeholder="Tên phòng ban (VD: Kế Toán)">
                     <button id="nutTaoPhongBan">Tạo & Lấy Link</button>
-                    <p id="linkPhongBanMoi" style="word-break: break-all; color: green;"></p>
-                </div>
-                <div style="flex: 1;">
-                    <h4>Tạo Tài Khoản</h4>
-                    <select id="chonPhongBanDeTaoTK"><option value="">-- Chọn phòng ban --</option></select>
+                    <p id="linkPhongBanMoi" style="word-break: break-all; color: green; font-size: 13px;"></p>
+
+                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
                     
+                    <h4>2. Nhập Tài Khoản Bằng Excel</h4>
+                    <p style="font-size: 12px; color: #555;">* Dòng đầu là tiêu đề: <strong>HoTen</strong>, <strong>ChuoiDangNhap</strong>, <strong>MaPin</strong>.</p>
+                    <select id="chonPhongBanDeTaoTK"><option value="">-- Chọn phòng ban để gán --</option></select>
+                    <input type="file" id="fileExcelTaiKhoan" accept=".xlsx, .xls">
+                    <button id="nutNhapExcel" style="background-color: #2196F3;">Tải Lên Excel</button>
+                    <p id="thongBaoExcel" style="color: green; font-weight: bold; font-size: 13px;"></p>
+                </div>
+
+                <div style="flex: 1; min-width: 300px; border-left: 1px dashed #ccc; padding-left: 20px;">
+                    <h4>3. Tạo 1 Tài Khoản</h4>
                     <input type="text" id="tenNhanVienMoi" placeholder="Họ và tên nhân viên">
                     <input type="text" id="chuoiDangNhapMoi" placeholder="Chuỗi ID (VD: ketoan)">
                     <input type="text" id="pinMacDinh" placeholder="PIN mặc định (4 số, VD: 0000)" maxlength="4">
-                    <button id="nutTaoTaiKhoan">Tạo 1 Tài Khoản</button>
-                    <p id="thongBaoTaoTK" style="color: green;"></p>
+                    <button id="nutTaoTaiKhoan">Tạo Tài Khoản</button>
+                    <p id="thongBaoTaoTK" style="color: green; font-size: 13px;"></p>
 
                     <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
 
-                    <h4>Hoặc Nhập Hàng Loạt Từ Excel</h4>
-                    <p style="font-size: 12px; color: #555;">* File Excel cần dòng đầu tiên là tiêu đề với 3 cột: <strong>HoTen</strong>, <strong>ChuoiDangNhap</strong>, <strong>MaPin</strong>.</p>
-                    <input type="file" id="fileExcelTaiKhoan" accept=".xlsx, .xls">
-                    <button id="nutNhapExcel" style="background-color: #2196F3;">Nhập Dữ Liệu Excel</button>
-                    <p id="thongBaoExcel" style="color: green; font-weight: bold;"></p>
+                    <h4>4. Sửa Tài Khoản</h4>
+                    <select id="chonTaiKhoanDeSua"><option value="">-- Chọn tài khoản cần sửa --</option></select>
+                    <input type="text" id="suaTenNhanVien" placeholder="Họ và tên mới">
+                    <input type="text" id="suaChuoiDangNhap" placeholder="Chuỗi ID mới">
+                    <input type="text" id="suaPin" placeholder="PIN mới (4 số)" maxlength="4">
+                    <button id="nutSuaTaiKhoan" style="background-color: #ff9800;">Cập Nhật Tài Khoản</button>
+                    <p id="thongBaoSuaTK" style="color: green; font-size: 13px;"></p>
                 </div>
             </div>
         </div>
@@ -159,7 +183,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, getDoc, query, where, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, setDoc, getDocs, getDoc, query, where, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA5N6rOzYqiNt-fa5BmkCMaOLzFklCiwM8",
@@ -177,8 +201,9 @@
     let nguoiDungHienTai = null;
     let phongBanHienTai = new URLSearchParams(window.location.search).get('phongban');
     let danhSachTaiKhoan = [];
+    let mangCongViecToanCuc = []; 
 
-    const manHinhDangNhap = document.getElementById('manHinhDangNhap');
+    const modalDangNhap = document.getElementById('modalDangNhap');
     const thongBaoDangNhap = document.getElementById('thongBaoDangNhap');
     const manHinhChinh = document.getElementById('manHinhChinh');
     const khuVucAdmin = document.getElementById('khuVucAdmin');
@@ -187,42 +212,72 @@
     const vungChonNguoiNhan = document.getElementById('vungChonNguoiNhan');
     const locTrangThai = document.getElementById('locTrangThai');
 
+    // Hàm tiện ích: Tạo mã link từ tên phòng ban (VD: "Kế toán" -> "ketoan")
+    function taoMaLinkPhongBan(chuoi) {
+        let ma = chuoi.toLowerCase();
+        ma = ma.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        ma = ma.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        ma = ma.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+        ma = ma.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        ma = ma.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        ma = ma.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        ma = ma.replace(/đ/g, "d");
+        ma = ma.replace(/\s+/g, ""); // Xóa khoảng trắng
+        ma = ma.replace(/[^a-z0-9]/g, ""); // Xóa ký tự đặc biệt
+        return ma;
+    }
+
     // Khởi tạo chạy ngay khi load xong
     async function khoiTao() {
+        document.getElementById('nutMoDangNhap').addEventListener('click', () => modalDangNhap.classList.remove('an-di'));
+        document.getElementById('nutDongDangNhap').addEventListener('click', () => modalDangNhap.classList.add('an-di'));
+        
         document.getElementById('nutDangNhap').addEventListener('click', xuLyDangNhap);
         document.getElementById('oNhapTaiKhoan').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') xuLyDangNhap();
         });
+        
         document.getElementById('nutDangXuat').addEventListener('click', () => {
             localStorage.removeItem('thongTinDangNhap'); location.reload();
         });
 
-        document.getElementById('nutTaoPhongBan').addEventListener('click', xuLyTaoPhongBan);
-        document.getElementById('nutTaoTaiKhoan').addEventListener('click', xuLyTaoTaiKhoan);
-        
-        // Sự kiện nhập Excel
-        document.getElementById('nutNhapExcel').addEventListener('click', xuLyNhapExcel);
-
-        document.getElementById('nutMoFormGiaoViec').addEventListener('click', () => formGiaoViec.classList.remove('an-di'));
+        // Nút Giao Việc - Check đăng nhập
+        document.getElementById('nutMoFormGiaoViec').addEventListener('click', () => {
+            if (!nguoiDungHienTai) { modalDangNhap.classList.remove('an-di'); return; }
+            formGiaoViec.classList.remove('an-di');
+        });
         document.getElementById('nutHuyGiaoViec').addEventListener('click', () => formGiaoViec.classList.add('an-di'));
         document.getElementById('nutTaoCongViec').addEventListener('click', xuLyTaoCongViec);
+        
+        // Admin Actions
+        document.getElementById('nutTaoPhongBan').addEventListener('click', xuLyTaoPhongBan);
+        document.getElementById('nutTaoTaiKhoan').addEventListener('click', xuLyTaoTaiKhoan);
+        document.getElementById('nutNhapExcel').addEventListener('click', xuLyNhapExcel);
+        document.getElementById('nutXuatExcelCongViec').addEventListener('click', xuLyXuatExcelCongViec);
+        document.getElementById('nutSuaTaiKhoan').addEventListener('click', xuLySuaTaiKhoan);
+        
+        // Event change dropdown sửa TK
+        document.getElementById('chonTaiKhoanDeSua').addEventListener('change', hienThiThongTinSua);
+
         locTrangThai.addEventListener('change', taiDanhSachCongViec);
 
         document.getElementById('nutDoiPin').addEventListener('click', () => document.getElementById('khuVucDoiPin').classList.remove('an-di'));
         document.getElementById('nutHuyDoiPin').addEventListener('click', () => document.getElementById('khuVucDoiPin').classList.add('an-di'));
         document.getElementById('nutXacNhanDoiPin').addEventListener('click', xuLyDoiPin);
 
-        const duLieuLuu = localStorage.getItem('thongTinDangNhap');
-        if (duLieuLuu) {
-            nguoiDungHienTai = JSON.parse(duLieuLuu);
-            hienThiGiaoDienSauDangNhap();
-        }
-
+        // Chạy ngầm dữ liệu chung
         try {
             await taoAdminMacDinh();
+            await taiDanhSachTatCaTaiKhoan(); // Load tất cả danh sách để hiện tên
+            taiDanhSachCongViec(); // Mặc định Load CV cho public xem
+            
+            const duLieuLuu = localStorage.getItem('thongTinDangNhap');
+            if (duLieuLuu) {
+                nguoiDungHienTai = JSON.parse(duLieuLuu);
+                hienThiGiaoDienSauDangNhap();
+            }
         } catch (loi) {
-            console.error("Lỗi khởi tạo Firebase:", loi);
-            thongBaoDangNhap.innerText = "Lỗi Firebase! Vui lòng kiểm tra lại cấu hình.";
+            console.error("Lỗi khởi tạo:", loi);
         }
     }
 
@@ -234,6 +289,17 @@
                 ten: "Quản Trị Viên", tenDangNhap: "111111", laAdmin: true, phongBanId: "tong"
             });
         }
+    }
+
+    async function taiDanhSachTatCaTaiKhoan() {
+        try {
+            const q = query(collection(coSoDuLieu, "nguoiDung"));
+            const snap = await getDocs(q);
+            danhSachTaiKhoan = [];
+            snap.forEach(d => {
+                danhSachTaiKhoan.push({ id: d.id, ...d.data() });
+            });
+        } catch(e) {}
     }
 
     async function TruyVanNguoiDung(chuoiTaiKhoan) {
@@ -264,68 +330,134 @@
         try {
             const thongTinUser = await TruyVanNguoiDung(chuoiTaiKhoan);
             if (thongTinUser) {
-                if (!thongTinUser.laAdmin && thongTinUser.phongBanId !== phongBanHienTai) {
-                    thongBaoDangNhap.innerText = "Tài khoản không thuộc phòng ban này hoặc link không hợp lệ!";
+                if (!thongTinUser.laAdmin && thongTinUser.phongBanId !== phongBanHienTai && phongBanHienTai) {
+                    thongBaoDangNhap.innerText = "Tài khoản không thuộc phòng ban của Link này!";
                     return;
                 }
                 nguoiDungHienTai = thongTinUser;
                 localStorage.setItem('thongTinDangNhap', JSON.stringify(thongTinUser));
                 thongBaoDangNhap.innerText = "";
+                modalDangNhap.classList.add('an-di');
                 hienThiGiaoDienSauDangNhap();
             } else {
                 thongBaoDangNhap.innerText = "Sai thông tin đăng nhập!";
             }
         } catch (loi) {
-            console.error("Lỗi truy vấn:", loi);
-            thongBaoDangNhap.innerText = "Lỗi kết nối dữ liệu! Đảm bảo anh đã tạo Firestore Database và cấp quyền Security Rules.";
+            thongBaoDangNhap.innerText = "Lỗi kết nối dữ liệu Firebase!";
         }
     }
 
-    async function hienThiGiaoDienSauDangNhap() {
-        manHinhDangNhap.classList.add('an-di');
-        manHinhChinh.classList.remove('an-di');
+    function hienThiGiaoDienSauDangNhap() {
+        document.getElementById('nutMoDangNhap').classList.add('an-di');
+        document.getElementById('nutDoiPin').classList.remove('an-di');
+        document.getElementById('nutDangXuat').classList.remove('an-di');
+
         document.getElementById('tenNguoiDungHienTai').innerText = `Xin chào, ${nguoiDungHienTai.ten || 'Admin'}`;
 
         if (nguoiDungHienTai.laAdmin) {
             khuVucAdmin.classList.remove('an-di');
             taiDanhSachPhongBanChoAdmin();
-        } else {
-            document.getElementById('tenPhongBanHienTai').innerText = "Phòng làm việc"; 
+            hienThiDropdownSuaTaiKhoan();
         }
 
-        taiDanhSachTaiKhoanPhongBan();
-        taiDanhSachCongViec();
+        taiDanhSachTaiKhoanDeGiaoViec();
+        taiDanhSachCongViec(); // Render lại danh sách để hiện nút bấm riêng
     }
 
-    async function xuLyDoiPin() {
-        const pinMoi = document.getElementById('pinMoi').value;
+    // --- CÁC HÀM ADMIN ---
+    async function xuLySuaTaiKhoan() {
+        const id = document.getElementById('chonTaiKhoanDeSua').value;
+        const ten = document.getElementById('suaTenNhanVien').value;
+        const chuoi = document.getElementById('suaChuoiDangNhap').value;
+        const pin = document.getElementById('suaPin').value;
+
+        if (!id || !ten || !chuoi) { alert("Vui lòng điền đủ tên và chuỗi ID."); return; }
+        
         try {
-            if (nguoiDungHienTai.laAdmin) {
-                if (pinMoi.trim() === "" || isNaN(pinMoi)) { alert("Thông tin đăng nhập của Admin phải là dãy số!"); return; }
-                await updateDoc(doc(coSoDuLieu, "nguoiDung", nguoiDungHienTai.id), { tenDangNhap: pinMoi });
-                nguoiDungHienTai.tenDangNhap = pinMoi;
-            } else {
-                if (pinMoi.length !== 4 || isNaN(pinMoi)) { alert("Mã PIN phải là 4 chữ số!"); return; }
-                await updateDoc(doc(coSoDuLieu, "nguoiDung", nguoiDungHienTai.id), { maPin: pinMoi });
-                nguoiDungHienTai.maPin = pinMoi;
+            await updateDoc(doc(coSoDuLieu, "nguoiDung", id), { ten: ten, tenDangNhap: chuoi, maPin: pin });
+            document.getElementById('thongBaoSuaTK').innerText = "Cập nhật thành công!";
+            await taiDanhSachTatCaTaiKhoan(); // Refresh dữ liệu
+            hienThiDropdownSuaTaiKhoan();
+        } catch(e) { alert("Lỗi khi sửa tài khoản"); }
+    }
+
+    function hienThiDropdownSuaTaiKhoan() {
+        const oChon = document.getElementById('chonTaiKhoanDeSua');
+        oChon.innerHTML = '<option value="">-- Chọn tài khoản cần sửa --</option>';
+        danhSachTaiKhoan.forEach(tk => {
+            if(!tk.laAdmin) {
+                oChon.innerHTML += `<option value="${tk.id}">${tk.ten} (ID: ${tk.tenDangNhap})</option>`;
             }
-            localStorage.setItem('thongTinDangNhap', JSON.stringify(nguoiDungHienTai));
-            alert("Đổi thông tin thành công!");
-            document.getElementById('khuVucDoiPin').classList.add('an-di');
-        } catch (loi) {
-            alert("Lỗi khi cập nhật dữ liệu!");
+        });
+    }
+
+    function hienThiThongTinSua(e) {
+        const id = e.target.value;
+        const tk = danhSachTaiKhoan.find(x => x.id === id);
+        if (tk) {
+            document.getElementById('suaTenNhanVien').value = tk.ten || "";
+            document.getElementById('suaChuoiDangNhap').value = tk.tenDangNhap || "";
+            document.getElementById('suaPin').value = tk.maPin || "";
+            document.getElementById('thongBaoSuaTK').innerText = "";
+        } else {
+            document.getElementById('suaTenNhanVien').value = "";
+            document.getElementById('suaChuoiDangNhap').value = "";
+            document.getElementById('suaPin').value = "";
         }
     }
 
+    function xuLyXuatExcelCongViec() {
+        if (mangCongViecToanCuc.length === 0) { alert("Không có công việc nào để xuất!"); return; }
+        
+        const timNguoi = (id) => { const n = danhSachTaiKhoan.find(x => x.id === id); return n ? n.ten : "Không rõ"; };
+
+        let duLieuXuat = mangCongViecToanCuc.map(cv => {
+            let nguoiNhan = cv.danhSachNguoiNhan && cv.danhSachNguoiNhan.length > 0 ? cv.danhSachNguoiNhan.map(id => timNguoi(id)).join(', ') : "Không gán đích danh";
+            let nguoiGiao = timNguoi(cv.nguoiGiaoId);
+            
+            let daXong = false;
+            if (cv.danhSachNguoiNhan && cv.danhSachNguoiNhan.length === 0) { daXong = (cv.trangThaiChung === 'hoan_thanh'); } 
+            else { daXong = cv.danhSachNguoiNhan.every(id => cv.tienDo[id] && cv.tienDo[id].trangThai === 'hoan_thanh'); }
+            
+            return {
+                "Tiêu Đề": cv.tieuDe,
+                "Nội Dung": cv.noiDung,
+                "Hạn Chót": cv.hanChot,
+                "Người Giao": nguoiGiao,
+                "Người Nhận": nguoiNhan,
+                "Trạng Thái": daXong ? "Đã Hoàn Thành" : "Chưa Xong"
+            };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(duLieuXuat);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "DanhSachCongViec");
+        XLSX.writeFile(wb, "DanhSachCongViec.xlsx");
+    }
+
+    // ĐÃ SỬA: Lấy tên phòng ban làm mã ID
     async function xuLyTaoPhongBan() {
         const tenPB = document.getElementById('tenPhongBanMoi').value;
         if (!tenPB) return;
+        
+        const maPB = taoMaLinkPhongBan(tenPB); // Tạo mã từ tên
+        if (!maPB) { alert("Tên phòng ban không hợp lệ!"); return; }
+
         try {
-            const taoMoi = await addDoc(collection(coSoDuLieu, "phongBan"), { tenPhongBan: tenPB });
-            const link = `${window.location.origin}${window.location.pathname}?phongban=${taoMoi.id}`;
-            document.getElementById('linkPhongBanMoi').innerText = `Link phòng ${tenPB}: ${link}`;
+            // Kiểm tra xem mã này đã tồn tại chưa
+            const kiemTra = await getDoc(doc(coSoDuLieu, "phongBan", maPB));
+            if (kiemTra.exists()) {
+                alert("Tên phòng ban này đã tồn tại. Vui lòng chọn tên khác!");
+                return;
+            }
+
+            // Dùng setDoc để biến maPB thành ID của Document luôn
+            await setDoc(doc(coSoDuLieu, "phongBan", maPB), { tenPhongBan: tenPB });
+            
+            const link = `${window.location.origin}${window.location.pathname}?phongban=${maPB}`;
+            document.getElementById('linkPhongBanMoi').innerText = `Link phòng: ${link}`;
             taiDanhSachPhongBanChoAdmin();
-        } catch (loi) { alert("Lỗi tạo phòng ban!"); }
+        } catch (loi) { alert("Lỗi khi tạo phòng ban!"); }
     }
 
     async function taiDanhSachPhongBanChoAdmin() {
@@ -333,7 +465,7 @@
             const q = query(collection(coSoDuLieu, "phongBan"));
             const snap = await getDocs(q);
             const oChon = document.getElementById('chonPhongBanDeTaoTK');
-            oChon.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
+            oChon.innerHTML = '<option value="">-- Chọn phòng ban để gán --</option>';
             snap.forEach(d => { oChon.innerHTML += `<option value="${d.id}">${d.data().tenPhongBan}</option>`; });
         } catch(e) {}
     }
@@ -348,85 +480,80 @@
         try {
             await addDoc(collection(coSoDuLieu, "nguoiDung"), { ten: ten, tenDangNhap: chuoiID, maPin: pin, phongBanId: pbId, laAdmin: false });
             document.getElementById('thongBaoTaoTK').innerText = `Đã tạo: ${chuoiID}${pin}`;
-        } catch (loi) { alert("Lỗi tạo tài khoản!"); }
+            await taiDanhSachTatCaTaiKhoan(); hienThiDropdownSuaTaiKhoan();
+        } catch (loi) {}
     }
 
-    // Xử lý tạo tài khoản hàng loạt từ Excel
     async function xuLyNhapExcel() {
         const pbId = document.getElementById('chonPhongBanDeTaoTK').value;
-        if (!pbId) {
-            alert("Vui lòng chọn phòng ban trước khi nhập file Excel!");
-            return;
-        }
+        if (!pbId) { alert("Vui lòng chọn phòng ban trước!"); return; }
 
         const fileInput = document.getElementById('fileExcelTaiKhoan');
         const file = fileInput.files[0];
-        if (!file) {
-            alert("Vui lòng chọn một file Excel!");
-            return;
-        }
+        if (!file) { alert("Vui lòng chọn một file Excel!"); return; }
 
         const thongBao = document.getElementById('thongBaoExcel');
-        thongBao.innerText = "Đang đọc dữ liệu và xử lý...";
+        thongBao.innerText = "Đang đọc dữ liệu...";
 
         const reader = new FileReader();
         reader.onload = async function(e) {
             try {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheet = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheet];
-                const danhSachTK = XLSX.utils.sheet_to_json(worksheet);
+                const danhSachTK = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
                 let soLuongTao = 0;
                 for (let i = 0; i < danhSachTK.length; i++) {
                     let tk = danhSachTK[i];
-                    
-                    // Lấy dữ liệu các cột, hỗ trợ nếu nhập chữ thường hoặc có dấu
                     let ten = tk.HoTen || tk.hoten || tk["Họ Tên"] || tk["Họ tên"];
                     let chuoiID = tk.ChuoiDangNhap || tk.chuoidangnhap || tk["Chuỗi đăng nhập"];
                     let pin = tk.MaPin || tk.mapin || tk.PIN || tk["Mã PIN"];
 
                     if (ten && chuoiID && pin) {
-                        // Xử lý để đảm bảo mã PIN luôn là chuỗi và có đủ 4 số (nếu Excel tự cắt số 0 ở đầu)
                         let pinChuoi = pin.toString().padStart(4, '0');
-                        
                         await addDoc(collection(coSoDuLieu, "nguoiDung"), {
-                            ten: ten.toString(),
-                            tenDangNhap: chuoiID.toString(),
-                            maPin: pinChuoi,
-                            phongBanId: pbId,
-                            laAdmin: false
+                            ten: ten.toString(), tenDangNhap: chuoiID.toString(), maPin: pinChuoi, phongBanId: pbId, laAdmin: false
                         });
                         soLuongTao++;
                     }
                 }
-                thongBao.innerText = `Hoàn tất! Đã tạo thành công ${soLuongTao} tài khoản.`;
-                fileInput.value = ""; // Xóa trắng ô chọn file
-                taiDanhSachTaiKhoanPhongBan(); // Cập nhật lại danh sách checkbox
-            } catch (loi) {
-                console.error(loi);
-                thongBao.innerText = "Lỗi khi xử lý file Excel! Đảm bảo định dạng file đúng chuẩn.";
-            }
+                thongBao.innerText = `Đã tạo ${soLuongTao} tài khoản.`;
+                fileInput.value = "";
+                await taiDanhSachTatCaTaiKhoan(); hienThiDropdownSuaTaiKhoan();
+            } catch (loi) { thongBao.innerText = "Lỗi khi xử lý file Excel!"; }
         };
         reader.readAsArrayBuffer(file);
     }
 
-    async function taiDanhSachTaiKhoanPhongBan() {
+    // --- CÁC HÀM CƠ BẢN ---
+    async function xuLyDoiPin() {
+        const pinMoi = document.getElementById('pinMoi').value;
+        try {
+            if (nguoiDungHienTai.laAdmin) {
+                if (pinMoi.trim() === "" || isNaN(pinMoi)) { alert("Phải là dãy số!"); return; }
+                await updateDoc(doc(coSoDuLieu, "nguoiDung", nguoiDungHienTai.id), { tenDangNhap: pinMoi });
+                nguoiDungHienTai.tenDangNhap = pinMoi;
+            } else {
+                if (pinMoi.length !== 4 || isNaN(pinMoi)) { alert("Mã PIN phải là 4 số!"); return; }
+                await updateDoc(doc(coSoDuLieu, "nguoiDung", nguoiDungHienTai.id), { maPin: pinMoi });
+                nguoiDungHienTai.maPin = pinMoi;
+            }
+            localStorage.setItem('thongTinDangNhap', JSON.stringify(nguoiDungHienTai));
+            alert("Đổi thông tin thành công!");
+            document.getElementById('khuVucDoiPin').classList.add('an-di');
+        } catch (loi) {}
+    }
+
+    async function taiDanhSachTaiKhoanDeGiaoViec() {
         let pId = phongBanHienTai || (nguoiDungHienTai.laAdmin ? document.getElementById('chonPhongBanDeTaoTK').value : nguoiDungHienTai.phongBanId); 
         if(!pId) return;
-        try {
-            const q = query(collection(coSoDuLieu, "nguoiDung"), where("phongBanId", "==", pId));
-            const snap = await getDocs(q);
-            
-            vungChonNguoiNhan.innerHTML = '';
-            danhSachTaiKhoan = [];
-            snap.forEach(d => {
-                const nv = { id: d.id, ...d.data() };
-                danhSachTaiKhoan.push(nv);
+        
+        vungChonNguoiNhan.innerHTML = '';
+        danhSachTaiKhoan.forEach(nv => {
+            if(nv.phongBanId === pId && !nv.laAdmin) {
                 vungChonNguoiNhan.innerHTML += `<label><input type="checkbox" class="cb-nguoi-nhan" value="${nv.id}"> ${nv.ten}</label>`;
-            });
-        } catch (e) {}
+            }
+        });
     }
 
     async function xuLyTaoCongViec() {
@@ -454,16 +581,13 @@
             });
             alert("Đã tạo công việc!");
             formGiaoViec.classList.add('an-di');
-            taiDanhSachCongViec();
-        } catch(loi) { alert("Lỗi tạo công việc!"); }
+        } catch(loi) {}
     }
 
     function taiDanhSachCongViec() {
-        const idPhong = phongBanHienTai || nguoiDungHienTai.phongBanId;
-        if (!idPhong) return;
-
         try {
-            const q = query(collection(coSoDuLieu, "congViec"), where("phongBanId", "==", idPhong));
+            // Lấy việc theo phòng ban trên URL. Nếu không có URL phòng ban, lấy tất cả.
+            const q = phongBanHienTai ? query(collection(coSoDuLieu, "congViec"), where("phongBanId", "==", phongBanHienTai)) : query(collection(coSoDuLieu, "congViec"));
             
             onSnapshot(q, (snap) => {
                 vungDanhSachCongViec.innerHTML = "";
@@ -472,22 +596,17 @@
 
                 snap.forEach(d => mangCongViec.push({ id: d.id, ...d.data() }));
                 mangCongViec.sort((a, b) => new Date(a.hanChot) - new Date(b.hanChot));
+                
+                mangCongViecToanCuc = mangCongViec; // Lưu vào biến toàn cục để phục vụ tải Excel
 
                 mangCongViec.forEach(cv => {
-                    if (cv.nguoiNhanId && !cv.danhSachNguoiNhan) {
-                        cv.danhSachNguoiNhan = [cv.nguoiNhanId];
-                        cv.tienDo = { [cv.nguoiNhanId]: { trangThai: cv.trangThai, ghiChu: cv.ghiChu || "", yeuCauGiaHan: cv.yeuCauGiaHan || false } };
-                    }
                     if (!cv.danhSachNguoiNhan) cv.danhSachNguoiNhan = [];
                     if (!cv.tienDo) cv.tienDo = {};
                     if (!cv.loaiLap) cv.loaiLap = 'khong';
 
                     let daXong = false;
-                    if (cv.danhSachNguoiNhan.length === 0) {
-                        daXong = (cv.trangThaiChung === 'hoan_thanh');
-                    } else {
-                        daXong = cv.danhSachNguoiNhan.every(id => cv.tienDo[id] && cv.tienDo[id].trangThai === 'hoan_thanh');
-                    }
+                    if (cv.danhSachNguoiNhan.length === 0) { daXong = (cv.trangThaiChung === 'hoan_thanh'); } 
+                    else { daXong = cv.danhSachNguoiNhan.every(id => cv.tienDo[id] && cv.tienDo[id].trangThai === 'hoan_thanh'); }
 
                     if (loc === "chua_hoan_thanh" && daXong) return;
                     if (loc === "hoan_thanh" && !daXong) return;
@@ -558,23 +677,27 @@
         
         html += `</div><div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">`;
 
-        if (cv.danhSachNguoiNhan.includes(nguoiDungHienTai.id)) {
-            const tdCuaToi = cv.tienDo[nguoiDungHienTai.id];
-            if (tdCuaToi && tdCuaToi.trangThai !== 'hoan_thanh') {
-                html += `
-                    <button class="nut-nho" onclick="window.capNhatTienDoCaNhan('${cv.id}', '${nguoiDungHienTai.id}', 'hoan_thanh')">Đánh dấu Hoàn thành (Phần của tôi)</button>
-                    <button class="nut-nho" style="background-color: #2196F3;" onclick="window.themGhiChuCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Thêm Ghi chú</button>
-                    <button class="nut-nho" style="background-color: #e91e63;" onclick="window.yeuCauGiaHanCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Yêu cầu Gia hạn</button>
-                `;
+        if (!nguoiDungHienTai) {
+            html += `<button class="nut-nho" style="background-color: #2196F3;" onclick="window.yeuCauDangNhap()">Cập nhật tiến độ</button>`;
+        } else {
+            if (cv.danhSachNguoiNhan.includes(nguoiDungHienTai.id)) {
+                const tdCuaToi = cv.tienDo[nguoiDungHienTai.id];
+                if (tdCuaToi && tdCuaToi.trangThai !== 'hoan_thanh') {
+                    html += `
+                        <button class="nut-nho" onclick="window.capNhatTienDoCaNhan('${cv.id}', '${nguoiDungHienTai.id}', 'hoan_thanh')">Hoàn thành (Của tôi)</button>
+                        <button class="nut-nho" style="background-color: #2196F3;" onclick="window.themGhiChuCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Thêm Ghi chú</button>
+                        <button class="nut-nho" style="background-color: #e91e63;" onclick="window.yeuCauGiaHanCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Xin Gia hạn</button>
+                    `;
+                }
             }
-        }
 
-        if (cv.danhSachNguoiNhan.length === 0 && !daXong && (cv.nguoiGiaoId === nguoiDungHienTai.id || nguoiDungHienTai.laAdmin)) {
-            html += `<button class="nut-nho" onclick="window.capNhatTienDoChung('${cv.id}', 'hoan_thanh')">Đánh dấu Hoàn thành toàn bộ</button>`;
-        }
+            if (cv.danhSachNguoiNhan.length === 0 && !daXong && (cv.nguoiGiaoId === nguoiDungHienTai.id || nguoiDungHienTai.laAdmin)) {
+                html += `<button class="nut-nho" onclick="window.capNhatTienDoChung('${cv.id}', 'hoan_thanh')">Hoàn thành toàn bộ</button>`;
+            }
 
-        if (cv.nguoiGiaoId === nguoiDungHienTai.id && coNguoiYeuCauGiaHan && !daXong) {
-            html += `<button class="nut-nho" style="background-color: #ff9800;" onclick="window.duyetGiaHan('${cv.id}')">Cập nhật hạn mới</button>`;
+            if (cv.nguoiGiaoId === nguoiDungHienTai.id && coNguoiYeuCauGiaHan && !daXong) {
+                html += `<button class="nut-nho" style="background-color: #ff9800;" onclick="window.duyetGiaHan('${cv.id}')">Cập nhật hạn mới</button>`;
+            }
         }
 
         html += `</div>`;
@@ -582,11 +705,15 @@
         vungDanhSachCongViec.appendChild(the);
     }
 
+    // Window functions
+    window.yeuCauDangNhap = () => {
+        modalDangNhap.classList.remove('an-di');
+    };
+
     window.capNhatTienDoCaNhan = async (idCv, idUser, trangThai) => {
         if(confirm("Xác nhận hoàn thành phần việc của bạn?")) {
             await updateDoc(doc(coSoDuLieu, "congViec", idCv), { 
-                [`tienDo.${idUser}.trangThai`]: trangThai,
-                [`tienDo.${idUser}.yeuCauGiaHan`]: false
+                [`tienDo.${idUser}.trangThai`]: trangThai, [`tienDo.${idUser}.yeuCauGiaHan`]: false
             });
             await kiemTraVaLapCongViec(idCv);
         }
@@ -630,15 +757,11 @@
         const cv = banGhi.data();
         
         let daXong = false;
-        if (cv.danhSachNguoiNhan.length === 0) {
-            daXong = (cv.trangThaiChung === 'hoan_thanh');
-        } else {
-            daXong = cv.danhSachNguoiNhan.every(id => cv.tienDo[id] && cv.tienDo[id].trangThai === 'hoan_thanh');
-        }
+        if (cv.danhSachNguoiNhan.length === 0) { daXong = (cv.trangThaiChung === 'hoan_thanh'); } 
+        else { daXong = cv.danhSachNguoiNhan.every(id => cv.tienDo[id] && cv.tienDo[id].trangThai === 'hoan_thanh'); }
 
         if (daXong && cv.loaiLap !== 'khong' && !cv.daTaoBanSao) {
             await updateDoc(doc(coSoDuLieu, "congViec", idCv), { daTaoBanSao: true });
-
             let ngayMoi = new Date(cv.hanChot);
             if (cv.loaiLap === 'ngay') ngayMoi.setDate(ngayMoi.getDate() + 1);
             if (cv.loaiLap === 'tuan') ngayMoi.setDate(ngayMoi.getDate() + 7);
@@ -646,9 +769,7 @@
 
             let tienDoMoi = {};
             if (cv.danhSachNguoiNhan) {
-                cv.danhSachNguoiNhan.forEach(id => {
-                    tienDoMoi[id] = { trangThai: "chua_hoan_thanh", ghiChu: "", yeuCauGiaHan: false };
-                });
+                cv.danhSachNguoiNhan.forEach(id => { tienDoMoi[id] = { trangThai: "chua_hoan_thanh", ghiChu: "", yeuCauGiaHan: false }; });
             }
 
             await addDoc(collection(coSoDuLieu, "congViec"), {
