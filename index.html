@@ -7,7 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .khung-chinh { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .khung-chinh { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         h1, h2, h3 { color: #333; }
         .an-di { display: none !important; }
         
@@ -23,22 +23,25 @@
         .nen-mo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; display: flex; align-items: center; justify-content: center; }
         .popup-dang-nhap { background: white; padding: 25px; border-radius: 8px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
 
-        /* Lưới công việc */
-        .danh-sach-cv { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
-        .the-cong-viec { padding: 15px; border-radius: 6px; border: 1px solid #ddd; background: #fff; position: relative; }
+        /* Bảng công việc */
+        .khung-bang { overflow-x: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 6px; }
+        .bang-cong-viec { width: 100%; border-collapse: collapse; background: #fff; min-width: 800px; }
+        .bang-cong-viec th, .bang-cong-viec td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+        .bang-cong-viec th { background-color: #f4f7f6; font-weight: bold; border-bottom: 2px solid #ccc; }
+        .bang-cong-viec tr:hover { background-color: #f9f9f9; }
         
-        /* Highlight theo ngày */
-        .han-1-ngay { border-left: 5px solid #ff0000; background-color: #ffe6e6; }
-        .han-2-ngay { border-left: 5px solid #ff9800; background-color: #fff0e6; }
-        .han-3-ngay { border-left: 5px solid #ffeb3b; background-color: #fffde7; }
-        .qua-han { border-left: 5px solid #000; background-color: #e0e0e0; color: #555; }
+        /* Highlight theo ngày trên Bảng */
+        .han-1-ngay > td { background-color: #ffe6e6 !important; border-top: 1px solid #ff0000; border-bottom: 1px solid #ff0000; }
+        .han-2-ngay > td { background-color: #fff0e6 !important; border-top: 1px solid #ff9800; border-bottom: 1px solid #ff9800; }
+        .han-3-ngay > td { background-color: #fffde7 !important; border-top: 1px solid #ffeb3b; border-bottom: 1px solid #ffeb3b; }
+        .qua-han > td { background-color: #e0e0e0 !important; color: #555; border-top: 1px solid #555; border-bottom: 1px solid #555; }
         
         /* Highlight Yêu cầu gia hạn */
-        .dang-yeu-cau-gia-han { border: 2px dashed #e91e63; animation: nhap-nhay 1.5s infinite; }
-        @keyframes nhap-nhay {
-            0% { box-shadow: 0 0 5px #e91e63; }
-            50% { box-shadow: 0 0 15px #e91e63; }
-            100% { box-shadow: 0 0 5px #e91e63; }
+        .dang-yeu-cau-gia-han > td { animation: nhap-nhay-bang 1.5s infinite; border-top: 2px dashed #e91e63; border-bottom: 2px dashed #e91e63; }
+        @keyframes nhap-nhay-bang {
+            0% { background-color: rgba(233, 30, 99, 0.05); }
+            50% { background-color: rgba(233, 30, 99, 0.2); }
+            100% { background-color: rgba(233, 30, 99, 0.05); }
         }
 
         /* Phân chia layout Admin/User */
@@ -168,15 +171,28 @@
 
             <div style="margin: 15px 0;">
                 <label>Lọc trạng thái: </label>
-                <select id="locTrangThai">
+                <select id="locTrangThai" style="width: auto; display: inline-block;">
                     <option value="chua_hoan_thanh">Chưa hoàn thành</option>
                     <option value="hoan_thanh">Đã hoàn thành</option>
                     <option value="tat_ca">Tất cả</option>
                 </select>
             </div>
 
-            <div id="vungDanhSachCongViec" class="danh-sach-cv">
-                </div>
+            <div class="khung-bang">
+                <table class="bang-cong-viec">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Công việc & Nội dung</th>
+                            <th style="width: 12%;">Hạn chót</th>
+                            <th style="width: 15%;">Người giao</th>
+                            <th style="width: 35%;">Tiến độ chi tiết</th>
+                            <th style="width: 13%; text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vungDanhSachCongViec">
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -212,7 +228,7 @@
     const vungChonNguoiNhan = document.getElementById('vungChonNguoiNhan');
     const locTrangThai = document.getElementById('locTrangThai');
 
-    // Hàm tiện ích: Tạo mã link từ tên phòng ban (VD: "Kế toán" -> "ketoan")
+    // Hàm tiện ích: Tạo mã link từ tên phòng ban
     function taoMaLinkPhongBan(chuoi) {
         let ma = chuoi.toLowerCase();
         ma = ma.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
@@ -241,7 +257,7 @@
             localStorage.removeItem('thongTinDangNhap'); location.reload();
         });
 
-        // Nút Giao Việc - Check đăng nhập
+        // Nút Giao Việc
         document.getElementById('nutMoFormGiaoViec').addEventListener('click', () => {
             if (!nguoiDungHienTai) { modalDangNhap.classList.remove('an-di'); return; }
             formGiaoViec.classList.remove('an-di');
@@ -255,8 +271,6 @@
         document.getElementById('nutNhapExcel').addEventListener('click', xuLyNhapExcel);
         document.getElementById('nutXuatExcelCongViec').addEventListener('click', xuLyXuatExcelCongViec);
         document.getElementById('nutSuaTaiKhoan').addEventListener('click', xuLySuaTaiKhoan);
-        
-        // Event change dropdown sửa TK
         document.getElementById('chonTaiKhoanDeSua').addEventListener('change', hienThiThongTinSua);
 
         locTrangThai.addEventListener('change', taiDanhSachCongViec);
@@ -265,11 +279,10 @@
         document.getElementById('nutHuyDoiPin').addEventListener('click', () => document.getElementById('khuVucDoiPin').classList.add('an-di'));
         document.getElementById('nutXacNhanDoiPin').addEventListener('click', xuLyDoiPin);
 
-        // Chạy ngầm dữ liệu chung
         try {
             await taoAdminMacDinh();
-            await taiDanhSachTatCaTaiKhoan(); // Load tất cả danh sách để hiện tên
-            taiDanhSachCongViec(); // Mặc định Load CV cho public xem
+            await taiDanhSachTatCaTaiKhoan();
+            taiDanhSachCongViec(); 
             
             const duLieuLuu = localStorage.getItem('thongTinDangNhap');
             if (duLieuLuu) {
@@ -361,7 +374,7 @@
         }
 
         taiDanhSachTaiKhoanDeGiaoViec();
-        taiDanhSachCongViec(); // Render lại danh sách để hiện nút bấm riêng
+        taiDanhSachCongViec(); 
     }
 
     // --- CÁC HÀM ADMIN ---
@@ -376,7 +389,7 @@
         try {
             await updateDoc(doc(coSoDuLieu, "nguoiDung", id), { ten: ten, tenDangNhap: chuoi, maPin: pin });
             document.getElementById('thongBaoSuaTK').innerText = "Cập nhật thành công!";
-            await taiDanhSachTatCaTaiKhoan(); // Refresh dữ liệu
+            await taiDanhSachTatCaTaiKhoan();
             hienThiDropdownSuaTaiKhoan();
         } catch(e) { alert("Lỗi khi sửa tài khoản"); }
     }
@@ -435,29 +448,24 @@
         XLSX.writeFile(wb, "DanhSachCongViec.xlsx");
     }
 
-    // ĐÃ SỬA: Lấy tên phòng ban làm mã ID
     async function xuLyTaoPhongBan() {
         const tenPB = document.getElementById('tenPhongBanMoi').value;
         if (!tenPB) return;
         
-        const maPB = taoMaLinkPhongBan(tenPB); // Tạo mã từ tên
+        const maPB = taoMaLinkPhongBan(tenPB);
         if (!maPB) { alert("Tên phòng ban không hợp lệ!"); return; }
 
         try {
-            // Kiểm tra xem mã này đã tồn tại chưa
             const kiemTra = await getDoc(doc(coSoDuLieu, "phongBan", maPB));
             if (kiemTra.exists()) {
                 alert("Tên phòng ban này đã tồn tại. Vui lòng chọn tên khác!");
                 return;
             }
-
-            // Dùng setDoc để biến maPB thành ID của Document luôn
             await setDoc(doc(coSoDuLieu, "phongBan", maPB), { tenPhongBan: tenPB });
-            
             const link = `${window.location.origin}${window.location.pathname}?phongban=${maPB}`;
             document.getElementById('linkPhongBanMoi').innerText = `Link phòng: ${link}`;
             taiDanhSachPhongBanChoAdmin();
-        } catch (loi) { alert("Lỗi khi tạo phòng ban!"); }
+        } catch (loi) {}
     }
 
     async function taiDanhSachPhongBanChoAdmin() {
@@ -584,9 +592,9 @@
         } catch(loi) {}
     }
 
+    // --- RENDER BẢNG CÔNG VIỆC ---
     function taiDanhSachCongViec() {
         try {
-            // Lấy việc theo phòng ban trên URL. Nếu không có URL phòng ban, lấy tất cả.
             const q = phongBanHienTai ? query(collection(coSoDuLieu, "congViec"), where("phongBanId", "==", phongBanHienTai)) : query(collection(coSoDuLieu, "congViec"));
             
             onSnapshot(q, (snap) => {
@@ -597,7 +605,7 @@
                 snap.forEach(d => mangCongViec.push({ id: d.id, ...d.data() }));
                 mangCongViec.sort((a, b) => new Date(a.hanChot) - new Date(b.hanChot));
                 
-                mangCongViecToanCuc = mangCongViec; // Lưu vào biến toàn cục để phục vụ tải Excel
+                mangCongViecToanCuc = mangCongViec;
 
                 mangCongViec.forEach(cv => {
                     if (!cv.danhSachNguoiNhan) cv.danhSachNguoiNhan = [];
@@ -618,8 +626,7 @@
     }
 
     function taoTheCongViec(cv, daXong) {
-        const the = document.createElement('div');
-        the.className = 'the-cong-viec';
+        const the = document.createElement('tr');
         
         const homNay = new Date(); homNay.setHours(0,0,0,0);
         const ngayHan = new Date(cv.hanChot);
@@ -635,72 +642,81 @@
 
         if (!daXong) {
             if (soNgayConLai < 0) { classHan = "qua-han"; textHan = "ĐÃ QUÁ HẠN!"; }
-            else if (soNgayConLai === 0 || soNgayConLai === 1) { classHan = "han-1-ngay"; textHan = "Hết hạn trong hôm nay/ngày mai!"; }
+            else if (soNgayConLai === 0 || soNgayConLai === 1) { classHan = "han-1-ngay"; textHan = "Hết hạn hôm nay/mai!"; }
             else if (soNgayConLai === 2) classHan = "han-2-ngay";
             else if (soNgayConLai === 3) classHan = "han-3-ngay";
             if (coNguoiYeuCauGiaHan) classHan += " dang-yeu-cau-gia-han";
         } else {
-            textHan = "Đã hoàn thành toàn bộ";
+            textHan = "Hoàn thành";
         }
 
-        the.className += ` ${classHan}`;
+        the.className = classHan;
 
         const timNguoi = (id) => { const n = danhSachTaiKhoan.find(x => x.id === id); return n ? n.ten : "Không rõ"; };
         let textLap = "";
-        if (cv.loaiLap === 'ngay') textLap = " (🔁 Lặp hàng ngày)";
-        if (cv.loaiLap === 'tuan') textLap = " (🔁 Lặp hàng tuần)";
+        if (cv.loaiLap === 'ngay') textLap = "(🔁 Lặp hàng ngày)";
+        if (cv.loaiLap === 'tuan') textLap = "(🔁 Lặp hàng tuần)";
 
-        let html = `
-            <h4>${cv.tieuDe} <span style="font-size:14px; color:#2196F3;">${textLap}</span> <span style="float:right; font-size:12px; color:red;">${coNguoiYeuCauGiaHan ? '🔥 CÓ YÊU CẦU GIA HẠN' : ''}</span></h4>
-            <p><strong>Hạn chót:</strong> ${cv.hanChot} <i>(${textHan})</i></p>
-            <p><strong>Người giao:</strong> ${timNguoi(cv.nguoiGiaoId)}</p>
-            <p><strong>Nội dung:</strong> ${cv.noiDung}</p>
-            <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                <strong>Tiến độ chi tiết:</strong>
-        `;
-
+        // Cột Tiến Độ
+        let htmlTienDo = '';
         if (cv.danhSachNguoiNhan.length === 0) {
-            html += `<p style="color: gray;"><i>Không giao cho cá nhân cụ thể. Trạng thái: ${daXong ? '✅ Đã xong' : '⏳ Đang chờ'}</i></p>`;
+            htmlTienDo = `<span style="color: gray; font-size: 13px;"><i>Chung: ${daXong ? '✅ Đã xong' : '⏳ Đang chờ'}</i></span>`;
         } else {
-            html += `<ul style="margin: 5px 0; padding-left: 20px;">`;
+            htmlTienDo = `<ul style="margin: 0; padding-left: 15px; font-size: 13px;">`;
             cv.danhSachNguoiNhan.forEach(id => {
                 const td = cv.tienDo[id];
-                html += `<li style="margin-bottom: 5px;">
+                htmlTienDo += `<li style="margin-bottom: 4px;">
                     <strong>${timNguoi(id)}:</strong> 
                     ${td.trangThai === 'hoan_thanh' ? '✅ Đã xong' : '⏳ Đang làm'}
-                    ${td.ghiChu ? ` - <i>Ghi chú: ${td.ghiChu}</i>` : ''}
-                    ${td.yeuCauGiaHan ? ' - <strong style="color:red">🔥 Xin gia hạn</strong>' : ''}
+                    ${td.ghiChu ? `<br><i style="color: #666;">- Ghi chú: ${td.ghiChu}</i>` : ''}
+                    ${td.yeuCauGiaHan ? '<br><strong style="color:red">🔥 Xin gia hạn</strong>' : ''}
                 </li>`;
             });
-            html += `</ul>`;
+            htmlTienDo += `</ul>`;
         }
-        
-        html += `</div><div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">`;
 
+        // Cột Nút Bấm
+        let htmlNut = `<div style="display: flex; flex-direction: column; gap: 5px;">`;
         if (!nguoiDungHienTai) {
-            html += `<button class="nut-nho" style="background-color: #2196F3;" onclick="window.yeuCauDangNhap()">Cập nhật tiến độ</button>`;
+            htmlNut += `<button class="nut-nho" style="background-color: #2196F3; margin: 0;" onclick="window.yeuCauDangNhap()">Cập nhật tiến độ</button>`;
         } else {
             if (cv.danhSachNguoiNhan.includes(nguoiDungHienTai.id)) {
                 const tdCuaToi = cv.tienDo[nguoiDungHienTai.id];
                 if (tdCuaToi && tdCuaToi.trangThai !== 'hoan_thanh') {
-                    html += `
-                        <button class="nut-nho" onclick="window.capNhatTienDoCaNhan('${cv.id}', '${nguoiDungHienTai.id}', 'hoan_thanh')">Hoàn thành (Của tôi)</button>
-                        <button class="nut-nho" style="background-color: #2196F3;" onclick="window.themGhiChuCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Thêm Ghi chú</button>
-                        <button class="nut-nho" style="background-color: #e91e63;" onclick="window.yeuCauGiaHanCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Xin Gia hạn</button>
+                    htmlNut += `
+                        <button class="nut-nho" style="margin: 0;" onclick="window.capNhatTienDoCaNhan('${cv.id}', '${nguoiDungHienTai.id}', 'hoan_thanh')">Xong (Phần tôi)</button>
+                        <button class="nut-nho" style="background-color: #2196F3; margin: 0;" onclick="window.themGhiChuCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Ghi chú</button>
+                        <button class="nut-nho" style="background-color: #e91e63; margin: 0;" onclick="window.yeuCauGiaHanCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Xin Gia hạn</button>
                     `;
                 }
             }
 
             if (cv.danhSachNguoiNhan.length === 0 && !daXong && (cv.nguoiGiaoId === nguoiDungHienTai.id || nguoiDungHienTai.laAdmin)) {
-                html += `<button class="nut-nho" onclick="window.capNhatTienDoChung('${cv.id}', 'hoan_thanh')">Hoàn thành toàn bộ</button>`;
+                htmlNut += `<button class="nut-nho" style="margin: 0;" onclick="window.capNhatTienDoChung('${cv.id}', 'hoan_thanh')">Đánh dấu Xong hết</button>`;
             }
 
             if (cv.nguoiGiaoId === nguoiDungHienTai.id && coNguoiYeuCauGiaHan && !daXong) {
-                html += `<button class="nut-nho" style="background-color: #ff9800;" onclick="window.duyetGiaHan('${cv.id}')">Cập nhật hạn mới</button>`;
+                htmlNut += `<button class="nut-nho" style="background-color: #ff9800; margin: 0;" onclick="window.duyetGiaHan('${cv.id}')">Cập nhật hạn mới</button>`;
             }
         }
+        htmlNut += `</div>`;
 
-        html += `</div>`;
+        let html = `
+            <td>
+                <strong style="font-size: 15px;">${cv.tieuDe}</strong>
+                <span style="font-size:12px; color:#2196F3; display:block;">${textLap}</span>
+                ${coNguoiYeuCauGiaHan ? '<span style="font-size:12px; color:red; font-weight:bold; display:block; margin-top:3px;">🔥 CÓ YÊU CẦU GIA HẠN</span>' : ''}
+                <div style="margin-top: 8px; font-size: 13px; color: #444; border-top: 1px dashed #ccc; padding-top: 5px;"><strong>Nội dung:</strong> ${cv.noiDung}</div>
+            </td>
+            <td style="white-space: nowrap;">
+                <strong>${cv.hanChot}</strong><br>
+                <span style="font-size: 13px; color: #555;">${textHan}</span>
+            </td>
+            <td>${timNguoi(cv.nguoiGiaoId)}</td>
+            <td>${htmlTienDo}</td>
+            <td>${htmlNut}</td>
+        `;
+
         the.innerHTML = html;
         vungDanhSachCongViec.appendChild(the);
     }
