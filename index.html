@@ -11,6 +11,11 @@
         h1, h2, h3 { color: #333; }
         .an-di { display: none !important; }
         
+        /* Tiêu đề chung */
+        .vung-tieu-de { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #2196F3; padding-bottom: 15px; }
+        .tieu-de-so { margin: 0; color: #d32f2f; font-size: 22px; text-transform: uppercase; }
+        .tieu-de-don-vi { margin: 5px 0 0 0; color: #1976d2; font-size: 20px; font-weight: bold; text-transform: uppercase; }
+
         /* Form và Nút bấm */
         input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
@@ -51,6 +56,9 @@
         /* Vùng chọn nhiều người nhận */
         .khung-chon-nhieu { max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: white; }
         .khung-chon-nhieu label { display: block; margin-bottom: 5px; cursor: pointer; }
+
+        /* Footer Bản quyền */
+        .chan-trang { text-align: center; margin-top: 30px; font-size: 13px; color: #666; padding-top: 15px; border-top: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -69,6 +77,11 @@
 </div>
 
 <div class="khung-chinh">
+    <div class="vung-tieu-de">
+        <h2 id="hienThiTieuDeSo" class="tieu-de-so">SỞ GD&ĐT ĐẮK LẮK</h2>
+        <h3 id="hienThiTieuDeDonVi" class="tieu-de-don-vi">ĐƠN VỊ</h3>
+    </div>
+
     <div id="manHinhChinh">
         <div class="thanh-cong-cu">
             <div>
@@ -124,6 +137,15 @@
                     <p id="thongBaoSuaTK" style="color: green; font-size: 13px;"></p>
                 </div>
             </div>
+
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
+            <h4>5. Cài Đặt Tiêu Đề Chung</h4>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="suaTieuDeSo" placeholder="Nhập tên Sở / Cơ quan chủ quản">
+                <input type="text" id="suaTieuDeDonVi" placeholder="Nhập tên Đơn vị / Trường học">
+            </div>
+            <button id="nutLuuTieuDe" style="background-color: #9c27b0;">Lưu Tiêu Đề</button>
+            <span id="thongBaoLuuTieuDe" style="color: green; font-size: 13px; margin-left: 10px; font-weight: bold;"></span>
         </div>
 
         <div id="khuVucDoiPin" class="vung-admin an-di" style="background-color: #fff3e0; border-color: #ff9800;">
@@ -193,6 +215,10 @@
                 </table>
             </div>
         </div>
+    </div>
+
+    <div class="chan-trang">
+        Bản quyền: Dlk Edu Tech - Phát triển bởi tranhongdan@tranphudlk.edu.vn
     </div>
 </div>
 
@@ -268,6 +294,9 @@
         document.getElementById('nutXuatExcelCongViec').addEventListener('click', xuLyXuatExcelCongViec);
         document.getElementById('nutSuaTaiKhoan').addEventListener('click', xuLySuaTaiKhoan);
         document.getElementById('chonTaiKhoanDeSua').addEventListener('change', hienThiThongTinSua);
+        
+        // Sự kiện lưu tiêu đề
+        document.getElementById('nutLuuTieuDe').addEventListener('click', xuLyLuuTieuDe);
 
         locTrangThai.addEventListener('change', taiDanhSachCongViec);
 
@@ -279,6 +308,7 @@
             await taoAdminMacDinh();
             await taiDanhSachTatCaTaiKhoan();
             taiDanhSachCongViec(); 
+            taiCaiDatTieuDe(); // Load cấu hình tiêu đề realtime
             
             const duLieuLuu = localStorage.getItem('thongTinDangNhap');
             if (duLieuLuu) {
@@ -309,6 +339,45 @@
                 danhSachTaiKhoan.push({ id: d.id, ...d.data() });
             });
         } catch(e) {}
+    }
+
+    // --- XỬ LÝ TIÊU ĐỀ CHUNG ---
+    function taiCaiDatTieuDe() {
+        onSnapshot(doc(coSoDuLieu, "caiDatChung", "tieuDe"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('hienThiTieuDeSo').innerText = data.tieuDeSo || "SỞ GD&ĐT ĐẮK LẮK";
+                document.getElementById('hienThiTieuDeDonVi').innerText = data.tieuDeDonVi || "ĐƠN VỊ";
+                
+                // Cập nhật ô input nếu admin đang đăng nhập
+                if(nguoiDungHienTai && nguoiDungHienTai.laAdmin) {
+                    document.getElementById('suaTieuDeSo').value = data.tieuDeSo || "SỞ GD&ĐT ĐẮK LẮK";
+                    document.getElementById('suaTieuDeDonVi').value = data.tieuDeDonVi || "ĐƠN VỊ";
+                }
+            } else {
+                // Nếu chưa có file cài đặt trên firebase, tạo mặc định
+                setDoc(doc(coSoDuLieu, "caiDatChung", "tieuDe"), {
+                    tieuDeSo: "SỞ GD&ĐT ĐẮK LẮK",
+                    tieuDeDonVi: "ĐƠN VỊ"
+                });
+            }
+        });
+    }
+
+    async function xuLyLuuTieuDe() {
+        const so = document.getElementById('suaTieuDeSo').value;
+        const dv = document.getElementById('suaTieuDeDonVi').value;
+        const thongBao = document.getElementById('thongBaoLuuTieuDe');
+        try {
+            await setDoc(doc(coSoDuLieu, "caiDatChung", "tieuDe"), {
+                tieuDeSo: so,
+                tieuDeDonVi: dv
+            });
+            thongBao.innerText = "Đã lưu cài đặt tiêu đề!";
+            setTimeout(() => { thongBao.innerText = ""; }, 3000);
+        } catch(e) {
+            alert("Lỗi khi lưu tiêu đề!");
+        }
     }
 
     async function TruyVanNguoiDung(chuoiTaiKhoan) {
@@ -367,6 +436,10 @@
             khuVucAdmin.classList.remove('an-di');
             taiDanhSachPhongBanChoAdmin();
             hienThiDropdownSuaTaiKhoan();
+            
+            // Render lại ô input tiêu đề nếu lỡ load chậm
+            document.getElementById('suaTieuDeSo').value = document.getElementById('hienThiTieuDeSo').innerText;
+            document.getElementById('suaTieuDeDonVi').value = document.getElementById('hienThiTieuDeDonVi').innerText;
         }
 
         taiDanhSachTaiKhoanDeGiaoViec();
@@ -585,7 +658,7 @@
             });
             alert("Đã tạo công việc!");
             formGiaoViec.classList.add('an-di');
-            document.getElementById('tieuDeCongViec').value = ""; // Xóa form sau khi tạo
+            document.getElementById('tieuDeCongViec').value = ""; 
         } catch(loi) {}
     }
 
@@ -653,13 +726,11 @@
         if (cv.loaiLap === 'ngay') textLap = "(🔁 Lặp hàng ngày)";
         if (cv.loaiLap === 'tuan') textLap = "(🔁 Lặp hàng tuần)";
 
-        // Xử lý gộp Tiêu đề và Nội dung cho dữ liệu cũ
         let htmlCongViec = `<strong style="font-size: 15px; color: #111;">${cv.tieuDe}</strong>`;
         if (cv.noiDung) {
             htmlCongViec += `<div style="margin-top: 5px; font-size: 13px; color: #555;">- ${cv.noiDung}</div>`;
         }
 
-        // Cột Tiến Độ
         let htmlTienDo = '';
         if (cv.danhSachNguoiNhan.length === 0) {
             htmlTienDo = `<span style="color: gray; font-size: 13px;"><i>Chung: ${daXong ? '✅ Đã xong' : '⏳ Đang chờ'}</i></span>`;
@@ -677,7 +748,6 @@
             htmlTienDo += `</ul>`;
         }
 
-        // Cột Nút Bấm
         let htmlNut = `<div style="display: flex; flex-direction: column; gap: 5px;">`;
         if (!nguoiDungHienTai) {
             htmlNut += `<button class="nut-nho" style="background-color: #2196F3; margin: 0; white-space: normal; padding: 5px;" onclick="window.yeuCauDangNhap()">Cập nhật tiến độ</button>`;
@@ -788,7 +858,6 @@
                 cv.danhSachNguoiNhan.forEach(id => { tienDoMoi[id] = { trangThai: "chua_hoan_thanh", ghiChu: "", yeuCauGiaHan: false }; });
             }
 
-            // Giữ lại nội dung nếu đây là công việc cũ có chứa thuộc tính noiDung
             await addDoc(collection(coSoDuLieu, "congViec"), {
                 tieuDe: cv.tieuDe, noiDung: cv.noiDung || "", nguoiGiaoId: cv.nguoiGiaoId,
                 danhSachNguoiNhan: cv.danhSachNguoiNhan, tienDo: tienDoMoi,
