@@ -25,7 +25,7 @@
 
         /* Bảng công việc */
         .khung-bang { overflow-x: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 6px; }
-        .bang-cong-viec { width: 100%; border-collapse: collapse; background: #fff; min-width: 800px; }
+        .bang-cong-viec { width: 100%; border-collapse: collapse; background: #fff; min-width: 850px; }
         .bang-cong-viec th, .bang-cong-viec td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
         .bang-cong-viec th { background-color: #f4f7f6; font-weight: bold; border-bottom: 2px solid #ccc; }
         .bang-cong-viec tr:hover { background-color: #f9f9f9; }
@@ -141,8 +141,7 @@
 
             <div id="formGiaoViec" class="vung-admin an-di" style="background-color: #e8f5e9; border-color: #4CAF50;">
                 <h4>Giao Công Việc Mới</h4>
-                <input type="text" id="tieuDeCongViec" placeholder="Tiêu đề công việc">
-                <textarea id="noiDungCongViec" placeholder="Nội dung chi tiết"></textarea>
+                <textarea id="tieuDeCongViec" placeholder="Nhập chi tiết nội dung công việc..." rows="4"></textarea>
                 
                 <div style="margin: 8px 0;">
                     <strong>Người nhận việc (Chọn một, nhiều người, hoặc bỏ trống):</strong>
@@ -182,11 +181,11 @@
                 <table class="bang-cong-viec">
                     <thead>
                         <tr>
-                            <th style="width: 25%;">Công việc & Nội dung</th>
-                            <th style="width: 12%;">Hạn chót</th>
+                            <th style="width: 37%;">Công việc</th>
+                            <th style="width: 10%;">Hạn chót</th>
                             <th style="width: 15%;">Người giao</th>
-                            <th style="width: 35%;">Tiến độ chi tiết</th>
-                            <th style="width: 13%; text-align: center;">Thao tác</th>
+                            <th style="width: 28%;">Tiến độ chi tiết</th>
+                            <th style="width: 10%; text-align: center; white-space: nowrap;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="vungDanhSachCongViec">
@@ -238,12 +237,11 @@
         ma = ma.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
         ma = ma.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
         ma = ma.replace(/đ/g, "d");
-        ma = ma.replace(/\s+/g, ""); // Xóa khoảng trắng
-        ma = ma.replace(/[^a-z0-9]/g, ""); // Xóa ký tự đặc biệt
+        ma = ma.replace(/\s+/g, ""); 
+        ma = ma.replace(/[^a-z0-9]/g, ""); 
         return ma;
     }
 
-    // Khởi tạo chạy ngay khi load xong
     async function khoiTao() {
         document.getElementById('nutMoDangNhap').addEventListener('click', () => modalDangNhap.classList.remove('an-di'));
         document.getElementById('nutDongDangNhap').addEventListener('click', () => modalDangNhap.classList.add('an-di'));
@@ -257,7 +255,6 @@
             localStorage.removeItem('thongTinDangNhap'); location.reload();
         });
 
-        // Nút Giao Việc
         document.getElementById('nutMoFormGiaoViec').addEventListener('click', () => {
             if (!nguoiDungHienTai) { modalDangNhap.classList.remove('an-di'); return; }
             formGiaoViec.classList.remove('an-di');
@@ -265,7 +262,6 @@
         document.getElementById('nutHuyGiaoViec').addEventListener('click', () => formGiaoViec.classList.add('an-di'));
         document.getElementById('nutTaoCongViec').addEventListener('click', xuLyTaoCongViec);
         
-        // Admin Actions
         document.getElementById('nutTaoPhongBan').addEventListener('click', xuLyTaoPhongBan);
         document.getElementById('nutTaoTaiKhoan').addEventListener('click', xuLyTaoTaiKhoan);
         document.getElementById('nutNhapExcel').addEventListener('click', xuLyNhapExcel);
@@ -377,7 +373,6 @@
         taiDanhSachCongViec(); 
     }
 
-    // --- CÁC HÀM ADMIN ---
     async function xuLySuaTaiKhoan() {
         const id = document.getElementById('chonTaiKhoanDeSua').value;
         const ten = document.getElementById('suaTenNhanVien').value;
@@ -432,9 +427,12 @@
             if (cv.danhSachNguoiNhan && cv.danhSachNguoiNhan.length === 0) { daXong = (cv.trangThaiChung === 'hoan_thanh'); } 
             else { daXong = cv.danhSachNguoiNhan.every(id => cv.tienDo[id] && cv.tienDo[id].trangThai === 'hoan_thanh'); }
             
+            // Xử lý việc nối dữ liệu cũ nếu file cũ có tách tiêu đề và nội dung
+            let noiDungFull = cv.tieuDe;
+            if (cv.noiDung) noiDungFull += " - " + cv.noiDung;
+
             return {
-                "Tiêu Đề": cv.tieuDe,
-                "Nội Dung": cv.noiDung,
+                "Công Việc": noiDungFull,
                 "Hạn Chót": cv.hanChot,
                 "Người Giao": nguoiGiao,
                 "Người Nhận": nguoiNhan,
@@ -533,7 +531,6 @@
         reader.readAsArrayBuffer(file);
     }
 
-    // --- CÁC HÀM CƠ BẢN ---
     async function xuLyDoiPin() {
         const pinMoi = document.getElementById('pinMoi').value;
         try {
@@ -566,11 +563,10 @@
 
     async function xuLyTaoCongViec() {
         const tieuDe = document.getElementById('tieuDeCongViec').value;
-        const noiDung = document.getElementById('noiDungCongViec').value;
         const hanChot = document.getElementById('hanChotCongViec').value;
         const loaiLap = document.getElementById('loaiLap').value;
 
-        if (!tieuDe || !hanChot) { alert("Vui lòng nhập đủ tiêu đề và hạn chót!"); return; }
+        if (!tieuDe || !hanChot) { alert("Vui lòng nhập nội dung công việc và hạn chót!"); return; }
 
         const cacHopKiem = document.querySelectorAll('.cb-nguoi-nhan:checked');
         let mangNguoiNhan = Array.from(cacHopKiem).map(cb => cb.value);
@@ -582,17 +578,17 @@
 
         try {
             await addDoc(collection(coSoDuLieu, "congViec"), {
-                tieuDe: tieuDe, noiDung: noiDung, nguoiGiaoId: nguoiDungHienTai.id,
+                tieuDe: tieuDe, nguoiGiaoId: nguoiDungHienTai.id,
                 danhSachNguoiNhan: mangNguoiNhan, tienDo: tienDoKhoiTao,
                 trangThaiChung: "chua_hoan_thanh", loaiLap: loaiLap, daTaoBanSao: false,
                 phongBanId: phongBanHienTai || nguoiDungHienTai.phongBanId, hanChot: hanChot
             });
             alert("Đã tạo công việc!");
             formGiaoViec.classList.add('an-di');
+            document.getElementById('tieuDeCongViec').value = ""; // Xóa form sau khi tạo
         } catch(loi) {}
     }
 
-    // --- RENDER BẢNG CÔNG VIỆC ---
     function taiDanhSachCongViec() {
         try {
             const q = phongBanHienTai ? query(collection(coSoDuLieu, "congViec"), where("phongBanId", "==", phongBanHienTai)) : query(collection(coSoDuLieu, "congViec"));
@@ -657,6 +653,12 @@
         if (cv.loaiLap === 'ngay') textLap = "(🔁 Lặp hàng ngày)";
         if (cv.loaiLap === 'tuan') textLap = "(🔁 Lặp hàng tuần)";
 
+        // Xử lý gộp Tiêu đề và Nội dung cho dữ liệu cũ
+        let htmlCongViec = `<strong style="font-size: 15px; color: #111;">${cv.tieuDe}</strong>`;
+        if (cv.noiDung) {
+            htmlCongViec += `<div style="margin-top: 5px; font-size: 13px; color: #555;">- ${cv.noiDung}</div>`;
+        }
+
         // Cột Tiến Độ
         let htmlTienDo = '';
         if (cv.danhSachNguoiNhan.length === 0) {
@@ -678,7 +680,7 @@
         // Cột Nút Bấm
         let htmlNut = `<div style="display: flex; flex-direction: column; gap: 5px;">`;
         if (!nguoiDungHienTai) {
-            htmlNut += `<button class="nut-nho" style="background-color: #2196F3; margin: 0;" onclick="window.yeuCauDangNhap()">Cập nhật tiến độ</button>`;
+            htmlNut += `<button class="nut-nho" style="background-color: #2196F3; margin: 0; white-space: normal; padding: 5px;" onclick="window.yeuCauDangNhap()">Cập nhật tiến độ</button>`;
         } else {
             if (cv.danhSachNguoiNhan.includes(nguoiDungHienTai.id)) {
                 const tdCuaToi = cv.tienDo[nguoiDungHienTai.id];
@@ -703,10 +705,9 @@
 
         let html = `
             <td>
-                <strong style="font-size: 15px;">${cv.tieuDe}</strong>
-                <span style="font-size:12px; color:#2196F3; display:block;">${textLap}</span>
+                ${htmlCongViec}
+                <span style="font-size:12px; color:#2196F3; display:block; margin-top: 5px;">${textLap}</span>
                 ${coNguoiYeuCauGiaHan ? '<span style="font-size:12px; color:red; font-weight:bold; display:block; margin-top:3px;">🔥 CÓ YÊU CẦU GIA HẠN</span>' : ''}
-                <div style="margin-top: 8px; font-size: 13px; color: #444; border-top: 1px dashed #ccc; padding-top: 5px;"><strong>Nội dung:</strong> ${cv.noiDung}</div>
             </td>
             <td style="white-space: nowrap;">
                 <strong>${cv.hanChot}</strong><br>
@@ -714,14 +715,13 @@
             </td>
             <td>${timNguoi(cv.nguoiGiaoId)}</td>
             <td>${htmlTienDo}</td>
-            <td>${htmlNut}</td>
+            <td style="text-align: center; vertical-align: middle;">${htmlNut}</td>
         `;
 
         the.innerHTML = html;
         vungDanhSachCongViec.appendChild(the);
     }
 
-    // Window functions
     window.yeuCauDangNhap = () => {
         modalDangNhap.classList.remove('an-di');
     };
@@ -788,8 +788,9 @@
                 cv.danhSachNguoiNhan.forEach(id => { tienDoMoi[id] = { trangThai: "chua_hoan_thanh", ghiChu: "", yeuCauGiaHan: false }; });
             }
 
+            // Giữ lại nội dung nếu đây là công việc cũ có chứa thuộc tính noiDung
             await addDoc(collection(coSoDuLieu, "congViec"), {
-                tieuDe: cv.tieuDe, noiDung: cv.noiDung, nguoiGiaoId: cv.nguoiGiaoId,
+                tieuDe: cv.tieuDe, noiDung: cv.noiDung || "", nguoiGiaoId: cv.nguoiGiaoId,
                 danhSachNguoiNhan: cv.danhSachNguoiNhan, tienDo: tienDoMoi,
                 trangThaiChung: "chua_hoan_thanh", loaiLap: cv.loaiLap, daTaoBanSao: false,
                 phongBanId: cv.phongBanId, hanChot: hanChotMoi
