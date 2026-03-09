@@ -26,7 +26,7 @@
         
         /* Popup Modal */
         .nen-mo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; display: flex; align-items: center; justify-content: center; }
-        .popup-dang-nhap { background: white; padding: 25px; border-radius: 8px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .popup-modal { background: white; padding: 25px; border-radius: 8px; width: 350px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
 
         /* Bảng công việc */
         .khung-bang { overflow-x: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 6px; }
@@ -71,7 +71,7 @@
 <body>
 
 <div id="modalDangNhap" class="nen-mo an-di">
-    <div class="popup-dang-nhap">
+    <div class="popup-modal">
         <h2 style="margin-top: 0;">Đăng Nhập</h2>
         <p style="font-size: 14px; color: #555;">(Admin: dãy số, User: Chuỗi + 4 số PIN)</p>
         <input type="text" id="oNhapTaiKhoan" placeholder="Nhập tài khoản">
@@ -80,6 +80,21 @@
             <button id="nutDongDangNhap" class="nut-huy" style="flex: 1;">Đóng</button>
         </div>
         <p id="thongBaoDangNhap" style="color: red; font-weight: bold; margin-bottom: 0;"></p>
+    </div>
+</div>
+
+<div id="modalSuaCongViec" class="nen-mo an-di">
+    <div class="popup-modal" style="width: 450px;">
+        <h3 style="margin-top: 0; color: #ff9800;">Sửa Công Việc</h3>
+        <input type="hidden" id="idCongViecCanSua">
+        <label style="font-weight: bold;">Nội dung công việc:</label>
+        <textarea id="suaNoiDungCongViec" rows="5"></textarea>
+        <label style="font-weight: bold;">Hạn chót:</label>
+        <input type="date" id="suaHanChotCongViec">
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button id="nutLuuSuaCongViec" style="flex: 1; background-color: #ff9800;">Cập Nhật</button>
+            <button id="nutDongSuaCongViec" class="nut-huy" style="flex: 1;">Hủy</button>
+        </div>
     </div>
 </div>
 
@@ -282,6 +297,7 @@
     let mangCongViecToanCuc = []; 
 
     const modalDangNhap = document.getElementById('modalDangNhap');
+    const modalSuaCongViec = document.getElementById('modalSuaCongViec');
     const thongBaoDangNhap = document.getElementById('thongBaoDangNhap');
     const manHinhChinh = document.getElementById('manHinhChinh');
     const khuVucAdmin = document.getElementById('khuVucAdmin');
@@ -290,7 +306,6 @@
     const vungChonNguoiNhan = document.getElementById('vungChonNguoiNhan');
     const locTrangThai = document.getElementById('locTrangThai');
 
-    // Hàm tiện ích: Tạo mã link từ tên phòng ban
     function taoMaLinkPhongBan(chuoi) {
         let ma = chuoi.toLowerCase();
         ma = ma.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
@@ -306,7 +321,6 @@
     }
 
     async function khoiTao() {
-        // Xử lý Tabs Admin
         document.querySelectorAll('.tab-admin').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.tab-admin').forEach(b => b.classList.remove('actived'));
@@ -319,6 +333,10 @@
         document.getElementById('nutMoDangNhap').addEventListener('click', () => modalDangNhap.classList.remove('an-di'));
         document.getElementById('nutDongDangNhap').addEventListener('click', () => modalDangNhap.classList.add('an-di'));
         
+        // Modal sửa công việc
+        document.getElementById('nutDongSuaCongViec').addEventListener('click', () => modalSuaCongViec.classList.add('an-di'));
+        document.getElementById('nutLuuSuaCongViec').addEventListener('click', xuLyLuuSuaCongViec);
+
         document.getElementById('nutDangNhap').addEventListener('click', xuLyDangNhap);
         document.getElementById('oNhapTaiKhoan').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') xuLyDangNhap();
@@ -335,17 +353,16 @@
         document.getElementById('nutHuyGiaoViec').addEventListener('click', () => formGiaoViec.classList.add('an-di'));
         document.getElementById('nutTaoCongViec').addEventListener('click', xuLyTaoCongViec);
         
-        // Admin Actions
         document.getElementById('nutTaoPhongBan').addEventListener('click', xuLyTaoPhongBan);
         document.getElementById('chonPhongBanDeSua').addEventListener('change', (e) => {
             const pb = danhSachPhongBan.find(x => x.id === e.target.value);
             document.getElementById('suaTenPhongBan').value = pb ? pb.tenPhongBan : "";
-            document.getElementById('vungHienThiLinkPB').style.display = "none"; // Ẩn link cũ
+            document.getElementById('vungHienThiLinkPB').style.display = "none"; 
             document.getElementById('thongBaoSuaPB').innerText = "";
         });
         document.getElementById('nutLuuPhongBan').addEventListener('click', xuLySuaPhongBan);
         document.getElementById('nutXoaPhongBan').addEventListener('click', xuLyXoaPhongBan);
-        document.getElementById('nutLayLinkPhongBan').addEventListener('click', xuLyLayLinkPhongBan); // Nút lấy link
+        document.getElementById('nutLayLinkPhongBan').addEventListener('click', xuLyLayLinkPhongBan); 
 
         document.getElementById('nutTaoTaiKhoan').addEventListener('click', xuLyTaoTaiKhoan);
         document.getElementById('nutNhapExcel').addEventListener('click', xuLyNhapExcel);
@@ -400,7 +417,6 @@
         } catch(e) {}
     }
 
-    // --- XỬ LÝ TIÊU ĐỀ CHUNG ---
     function taiCaiDatTieuDe() {
         onSnapshot(doc(coSoDuLieu, "caiDatChung", "tieuDe"), (docSnap) => {
             if (docSnap.exists()) {
@@ -500,7 +516,6 @@
         taiDanhSachCongViec(); 
     }
 
-    // --- CÁC HÀM QUẢN TRỊ TÀI KHOẢN ---
     async function xuLySuaTaiKhoan() {
         const id = document.getElementById('chonTaiKhoanDeSua').value;
         const ten = document.getElementById('suaTenNhanVien').value;
@@ -562,7 +577,6 @@
         }
     }
 
-    // --- CÁC HÀM QUẢN TRỊ PHÒNG BAN ---
     async function xuLyTaoPhongBan() {
         const tenPB = document.getElementById('tenPhongBanMoi').value;
         if (!tenPB) return;
@@ -615,7 +629,6 @@
         }
     }
 
-    // Hàm chức năng: Lấy Link cho phòng ban đã tạo
     function xuLyLayLinkPhongBan() {
         const id = document.getElementById('chonPhongBanDeSua').value;
         const vungHienThi = document.getElementById('vungHienThiLinkPB');
@@ -741,7 +754,6 @@
         XLSX.writeFile(wb, "DanhSachCongViec.xlsx");
     }
 
-    // --- CÁC HÀM CƠ BẢN ---
     async function xuLyDoiPin() {
         const pinMoi = document.getElementById('pinMoi').value;
         try {
@@ -800,7 +812,6 @@
         } catch(loi) {}
     }
 
-    // --- RENDER BẢNG CÔNG VIỆC ---
     function taiDanhSachCongViec() {
         try {
             const q = phongBanHienTai ? query(collection(coSoDuLieu, "congViec"), where("phongBanId", "==", phongBanHienTai)) : query(collection(coSoDuLieu, "congViec"));
@@ -906,8 +917,14 @@
                 htmlNut += `<button class="nut-nho" style="margin: 0;" onclick="window.capNhatTienDoChung('${cv.id}', 'hoan_thanh')">Đánh dấu Xong hết</button>`;
             }
 
-            if (cv.nguoiGiaoId === nguoiDungHienTai.id && coNguoiYeuCauGiaHan && !daXong) {
-                htmlNut += `<button class="nut-nho" style="background-color: #ff9800; margin: 0;" onclick="window.duyetGiaHan('${cv.id}')">Cập nhật hạn mới</button>`;
+            // Nút Sửa & Xóa cho người giao hoặc admin
+            if (cv.nguoiGiaoId === nguoiDungHienTai.id || nguoiDungHienTai.laAdmin) {
+                htmlNut += `
+                    <div style="display: flex; gap: 5px;">
+                        <button class="nut-nho" style="background-color: #ff9800; flex: 1; margin: 0;" onclick="window.suaCongViec('${cv.id}')">Sửa</button>
+                        <button class="nut-nho nut-huy" style="flex: 1; margin: 0;" onclick="window.xoaCongViec('${cv.id}')">Xóa</button>
+                    </div>
+                `;
             }
         }
         htmlNut += `</div>`;
@@ -931,6 +948,7 @@
         vungDanhSachCongViec.appendChild(the);
     }
 
+    // Window functions
     window.yeuCauDangNhap = () => {
         modalDangNhap.classList.remove('an-di');
     };
@@ -962,19 +980,54 @@
         }
     };
 
-    window.duyetGiaHan = async (idCv) => {
-        const hanMoi = prompt("Nhập ngày hạn chót mới (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
-        if (hanMoi) {
-            const banGhi = await getDoc(doc(coSoDuLieu, "congViec", idCv));
-            if (!banGhi.exists()) return;
-            const cv = banGhi.data();
-            let capNhat = { hanChot: hanMoi };
-            if (cv.danhSachNguoiNhan && cv.danhSachNguoiNhan.length > 0) {
-                cv.danhSachNguoiNhan.forEach(id => { capNhat[`tienDo.${id}.yeuCauGiaHan`] = false; });
+    // --- CHỨC NĂNG SỬA & XÓA CÔNG VIỆC ---
+    window.xoaCongViec = async (idCv) => {
+        if(confirm("Bạn có chắc chắn muốn XÓA công việc này?")) {
+            try {
+                await deleteDoc(doc(coSoDuLieu, "congViec", idCv));
+            } catch(e) {
+                alert("Lỗi khi xóa công việc!");
             }
-            await updateDoc(doc(coSoDuLieu, "congViec", idCv), capNhat);
         }
     };
+
+    window.suaCongViec = (idCv) => {
+        const cv = mangCongViecToanCuc.find(x => x.id === idCv);
+        if (!cv) return;
+        
+        let noiDungFull = cv.tieuDe;
+        if (cv.noiDung) noiDungFull += " - " + cv.noiDung; // Hỗ trợ data cũ
+
+        document.getElementById('idCongViecCanSua').value = idCv;
+        document.getElementById('suaNoiDungCongViec').value = noiDungFull;
+        document.getElementById('suaHanChotCongViec').value = cv.hanChot;
+        document.getElementById('modalSuaCongViec').classList.remove('an-di');
+    };
+
+    async function xuLyLuuSuaCongViec() {
+        const id = document.getElementById('idCongViecCanSua').value;
+        const noiDungMoi = document.getElementById('suaNoiDungCongViec').value;
+        const hanChotMoi = document.getElementById('suaHanChotCongViec').value;
+        
+        if (!noiDungMoi || !hanChotMoi) { alert("Vui lòng nhập đủ nội dung và hạn chót!"); return; }
+
+        const cv = mangCongViecToanCuc.find(x => x.id === id);
+        let capNhat = { tieuDe: noiDungMoi, noiDung: "", hanChot: hanChotMoi };
+
+        // Xóa cờ yêu cầu gia hạn của tất cả mọi người khi sửa
+        if (cv && cv.danhSachNguoiNhan) {
+            cv.danhSachNguoiNhan.forEach(uid => {
+                capNhat[`tienDo.${uid}.yeuCauGiaHan`] = false;
+            });
+        }
+
+        try {
+            await updateDoc(doc(coSoDuLieu, "congViec", id), capNhat);
+            document.getElementById('modalSuaCongViec').classList.add('an-di');
+        } catch(e) {
+            alert("Lỗi khi cập nhật công việc!");
+        }
+    }
 
     async function kiemTraVaLapCongViec(idCv) {
         const banGhi = await getDoc(doc(coSoDuLieu, "congViec", idCv));
