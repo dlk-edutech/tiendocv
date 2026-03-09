@@ -149,13 +149,13 @@
                         <p id="linkPhongBanMoi" style="word-break: break-all; color: green; font-size: 13px;"></p>
                     </div>
                     <div style="flex: 1; min-width: 300px; border-left: 1px dashed #ccc; padding-left: 20px;">
-                        <h4>Cập Nhật / Xóa / Lấy Link</h4>
+                        <h4>Cập Nhật / Xóa / Copy link</h4>
                         <select id="chonPhongBanDeSua"><option value="">-- Chọn phòng ban đã tạo --</option></select>
                         <input type="text" id="suaTenPhongBan" placeholder="Tên phòng ban mới (để cập nhật)">
                         <div style="display: flex; gap: 10px;">
                             <button id="nutLuuPhongBan" style="background-color: #ff9800; flex: 1;">Cập Nhật</button>
                             <button id="nutXoaPhongBan" class="nut-huy" style="flex: 1;">Xóa</button>
-                            <button id="nutLayLinkPhongBan" style="background-color: #2196F3; flex: 1;">Lấy Link</button>
+                            <button id="nutLayLinkPhongBan" style="background-color: #2196F3; flex: 1;">Copy link</button>
                         </div>
                         <p id="thongBaoSuaPB" style="color: green; font-size: 13px; margin-top: 10px;"></p>
                         <div id="vungHienThiLinkPB" style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 4px; display: none; word-break: break-all; font-size: 13px; color: #0277bd; border: 1px dashed #2196F3;">
@@ -353,6 +353,7 @@
         document.getElementById('nutHuyGiaoViec').addEventListener('click', () => formGiaoViec.classList.add('an-di'));
         document.getElementById('nutTaoCongViec').addEventListener('click', xuLyTaoCongViec);
         
+        // Admin Actions
         document.getElementById('nutTaoPhongBan').addEventListener('click', xuLyTaoPhongBan);
         document.getElementById('chonPhongBanDeSua').addEventListener('change', (e) => {
             const pb = danhSachPhongBan.find(x => x.id === e.target.value);
@@ -635,14 +636,21 @@
         const oLink = document.getElementById('linkPhongBanHienTai');
         
         if(!id) {
-            alert("Vui lòng chọn phòng ban từ danh sách để lấy link!");
+            alert("Vui lòng chọn phòng ban từ danh sách để copy link!");
             vungHienThi.style.display = "none";
             return;
         }
 
         const link = `${window.location.origin}${window.location.pathname}?phongban=${id}`;
-        oLink.innerText = link;
-        vungHienThi.style.display = "block";
+        
+        navigator.clipboard.writeText(link).then(() => {
+            alert("Đã copy link thành công!");
+            oLink.innerText = link;
+            vungHienThi.style.display = "block";
+        }).catch(err => {
+            oLink.innerText = link;
+            vungHienThi.style.display = "block";
+        });
     }
 
     async function taiDanhSachPhongBanChoAdmin() {
@@ -906,7 +914,7 @@
                 const tdCuaToi = cv.tienDo[nguoiDungHienTai.id];
                 if (tdCuaToi && tdCuaToi.trangThai !== 'hoan_thanh') {
                     htmlNut += `
-                        <button class="nut-nho" style="margin: 0;" onclick="window.capNhatTienDoCaNhan('${cv.id}', '${nguoiDungHienTai.id}', 'hoan_thanh')">Hoàn thành</button>
+                        <button class="nut-nho" style="margin: 0; background-color: #4CAF50;" onclick="window.capNhatTienDoCaNhan('${cv.id}', '${nguoiDungHienTai.id}', 'hoan_thanh')">Hoàn thành</button>
                         <button class="nut-nho" style="background-color: #2196F3; margin: 0;" onclick="window.themGhiChuCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Ghi chú</button>
                         <button class="nut-nho" style="background-color: #e91e63; margin: 0;" onclick="window.yeuCauGiaHanCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Xin Gia hạn</button>
                     `;
@@ -914,7 +922,7 @@
             }
 
             if (cv.danhSachNguoiNhan.length === 0 && !daXong && (cv.nguoiGiaoId === nguoiDungHienTai.id || nguoiDungHienTai.laAdmin)) {
-                htmlNut += `<button class="nut-nho" style="margin: 0;" onclick="window.capNhatTienDoChung('${cv.id}', 'hoan_thanh')">Đánh dấu Xong hết</button>`;
+                htmlNut += `<button class="nut-nho" style="margin: 0; background-color: #4CAF50;" onclick="window.capNhatTienDoChung('${cv.id}', 'hoan_thanh')">Hoàn thành</button>`;
             }
 
             if (cv.nguoiGiaoId === nguoiDungHienTai.id || nguoiDungHienTai.laAdmin) {
