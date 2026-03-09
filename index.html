@@ -193,6 +193,7 @@
                     <div style="flex: 1; min-width: 300px; border-left: 1px dashed #ccc; padding-left: 20px;">
                         <h4>Sửa / Xóa Tài Khoản</h4>
                         <select id="chonTaiKhoanDeSua"><option value="">-- Chọn tài khoản cần sửa --</option></select>
+                        <select id="suaPhongBanNhanVien"><option value="">-- Chọn phòng ban trực thuộc --</option></select>
                         <input type="text" id="suaTenNhanVien" placeholder="Họ và tên mới">
                         <input type="text" id="suaChuoiDangNhap" placeholder="Chuỗi ID mới">
                         <input type="text" id="suaPin" placeholder="PIN mới (4 số)" maxlength="4">
@@ -611,16 +612,17 @@
 
     async function xuLySuaTaiKhoan() {
         const id = document.getElementById('chonTaiKhoanDeSua').value;
+        const pbIdMoi = document.getElementById('suaPhongBanNhanVien').value;
         const ten = document.getElementById('suaTenNhanVien').value;
         const chuoi = document.getElementById('suaChuoiDangNhap').value;
         const pin = document.getElementById('suaPin').value;
         const vaitro = document.getElementById('suaVaiTroNhanVien').value;
         const tb = document.getElementById('thongBaoSuaTK');
 
-        if (!id || !ten || !chuoi) { alert("Vui lòng điền đủ tên và chuỗi ID."); return; }
+        if (!id || !ten || !chuoi || !pbIdMoi) { alert("Vui lòng điền đủ tên, chuỗi ID và chọn phòng ban trực thuộc."); return; }
         try {
             await updateDoc(doc(coSoDuLieu, "nguoiDung", id), { 
-                ten: ten, tenDangNhap: chuoi, maPin: pin, vaiTro: vaitro, laTruongPhong: false 
+                ten: ten, tenDangNhap: chuoi, maPin: pin, vaiTro: vaitro, phongBanId: pbIdMoi, laTruongPhong: false 
             });
             tb.innerText = "Cập nhật tài khoản thành công!";
             setTimeout(() => { tb.innerText = ""; }, 3000);
@@ -642,6 +644,7 @@
                 document.getElementById('suaTenNhanVien').value = "";
                 document.getElementById('suaChuoiDangNhap').value = "";
                 document.getElementById('suaPin').value = "";
+                document.getElementById('suaPhongBanNhanVien').value = "";
                 await taiDanhSachTatCaTaiKhoan();
                 hienThiDropdownSuaTaiKhoan();
             } catch(e) { alert("Lỗi khi xóa tài khoản"); }
@@ -664,12 +667,14 @@
         const id = e.target.value;
         const tk = danhSachTaiKhoan.find(x => x.id === id);
         if (tk) {
+            document.getElementById('suaPhongBanNhanVien').value = tk.phongBanId || "";
             document.getElementById('suaTenNhanVien').value = tk.ten || "";
             document.getElementById('suaChuoiDangNhap').value = tk.tenDangNhap || "";
             document.getElementById('suaPin').value = tk.maPin || "";
             document.getElementById('suaVaiTroNhanVien').value = tk.vaiTro || (tk.laTruongPhong ? "to_truong" : "nhan_vien");
             document.getElementById('thongBaoSuaTK').innerText = "";
         } else {
+            document.getElementById('suaPhongBanNhanVien').value = "";
             document.getElementById('suaTenNhanVien').value = "";
             document.getElementById('suaChuoiDangNhap').value = "";
             document.getElementById('suaPin').value = "";
@@ -758,11 +763,13 @@
             
             const oChonTK = document.getElementById('chonPhongBanDeTaoTK');
             const oChonSua = document.getElementById('chonPhongBanDeSua');
+            const oChonSuaPB_NV = document.getElementById('suaPhongBanNhanVien');
             const oLocAdmin = document.getElementById('locPhongBanAdmin');
             const oChonGV = document.getElementById('chonPhongBanGiaoViec');
             
             oChonTK.innerHTML = '<option value="">-- Chọn phòng ban để gán --</option>';
             oChonSua.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
+            oChonSuaPB_NV.innerHTML = '<option value="">-- Chọn phòng ban trực thuộc --</option>';
             oLocAdmin.innerHTML = '<option value="">-- Tất cả phòng ban --</option>';
             oChonGV.innerHTML = '<option value="">-- Chọn phòng ban để giao việc --</option>';
 
@@ -772,6 +779,7 @@
                 danhSachPhongBan.push({ id: d.id, ...dData });
                 oChonTK.innerHTML += `<option value="${d.id}">${dData.tenPhongBan}</option>`; 
                 oChonSua.innerHTML += `<option value="${d.id}">${dData.tenPhongBan}</option>`; 
+                oChonSuaPB_NV.innerHTML += `<option value="${d.id}">${dData.tenPhongBan}</option>`; 
                 oLocAdmin.innerHTML += `<option value="${d.id}">${dData.tenPhongBan}</option>`; 
                 oChonGV.innerHTML += `<option value="${d.id}">${dData.tenPhongBan}</option>`; 
             });
