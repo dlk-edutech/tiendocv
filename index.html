@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Công Việc</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .khung-chinh { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #333; }
+        .an-di { display: none !important; }
+        
+        /* Form và Nút bấm */
+        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #45a049; }
+        .nut-huy { background-color: #f44336; }
+        .nut-huy:hover { background-color: #da190b; }
+        .nut-nho { padding: 5px 10px; font-size: 12px; margin-right: 5px; }
+        
+        /* Lưới công việc */
+        .danh-sach-cv { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+        .the-cong-viec { padding: 15px; border-radius: 6px; border: 1px solid #ddd; background: #fff; position: relative; }
+        
+        /* Highlight theo ngày */
+        .han-1-ngay { border-left: 5px solid #ff0000; background-color: #ffe6e6; }
+        .han-2-ngay { border-left: 5px solid #ff9800; background-color: #fff0e6; }
+        .han-3-ngay { border-left: 5px solid #ffeb3b; background-color: #fffde7; }
+        .qua-han { border-left: 5px solid #000; background-color: #e0e0e0; color: #555; }
+        
+        /* Highlight Yêu cầu gia hạn */
+        .dang-yeu-cau-gia-han { border: 2px dashed #e91e63; animation: nhap-nhay 1.5s infinite; }
+        @keyframes nhap-nhay {
+            0% { box-shadow: 0 0 5px #e91e63; }
+            50% { box-shadow: 0 0 15px #e91e63; }
+            100% { box-shadow: 0 0 5px #e91e63; }
+        }
+
+        /* Phân chia layout Admin/User */
+        .vung-admin { border: 1px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 5px; background-color: #e3f2fd; }
+        .thanh-cong-cu { display: flex; justify-content: space-between; align-items: center; background: #eee; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        
+        /* Vùng chọn nhiều người nhận */
+        .khung-chon-nhieu { max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: white; }
+        .khung-chon-nhieu label { display: block; margin-bottom: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="khung-chinh">
+    <div id="manHinhDangNhap">
+        <h2 id="tieuDeDangNhap">Đăng Nhập</h2>
+        <p>Vui lòng nhập chuỗi đăng nhập (Admin: dãy số, User: Chuỗi + 4 số PIN)</p>
+        <input type="text" id="oNhapTaiKhoan" placeholder="Nhập tài khoản">
+        <button id="nutDangNhap">Đăng Nhập</button>
+        <p id="thongBaoDangNhap" style="color: red;"></p>
+    </div>
+
+    <div id="manHinhChinh" class="an-di">
+        <div class="thanh-cong-cu">
+            <div>
+                <span id="tenNguoiDungHienTai">Xin chào, </span>
+                <span id="tenPhongBanHienTai" style="font-weight: bold; color: #2196F3; margin-left: 10px;"></span>
+            </div>
+            <div>
+                <button id="nutDoiPin" class="nut-nho" style="background-color: #ff9800;">Đổi mã PIN</button>
+                <button id="nutDangXuat" class="nut-nho nut-huy">Đăng Xuất</button>
+            </div>
+        </div>
+
+        <div id="khuVucAdmin" class="vung-admin an-di">
+            <h3>Khu Vực Quản Trị Hệ Thống</h3>
+            <div style="display: flex; gap: 20px;">
+                <div style="flex: 1;">
+                    <h4>Tạo Phòng Ban</h4>
+                    <input type="text" id="tenPhongBanMoi" placeholder="Tên phòng ban (VD: Kế Toán)">
+                    <button id="nutTaoPhongBan">Tạo & Lấy Link</button>
+                    <p id="linkPhongBanMoi" style="word-break: break-all; color: green;"></p>
+                </div>
+                <div style="flex: 1;">
+                    <h4>Tạo Tài Khoản</h4>
+                    <select id="chonPhongBanDeTaoTK"><option value="">-- Chọn phòng ban --</option></select>
+                    <input type="text" id="tenNhanVienMoi" placeholder="Họ và tên nhân viên">
+                    <input type="text" id="chuoiDangNhapMoi" placeholder="Chuỗi ID (VD: ketoan)">
+                    <input type="text" id="pinMacDinh" placeholder="PIN mặc định (4 số, VD: 0000)" maxlength="4">
+                    <button id="nutTaoTaiKhoan">Tạo Tài Khoản</button>
+                    <p id="thongBaoTaoTK" style="color: green;"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="khuVucDoiPin" class="vung-admin an-di" style="background-color: #fff3e0; border-color: #ff9800;">
+            <h3>Đổi Thông Tin Đăng Nhập</h3>
+            <input type="text" id="pinMoi" placeholder="Nhập dãy số mới (Admin) hoặc 4 số (User)">
+            <button id="nutXacNhanDoiPin">Xác Nhận</button>
+            <button id="nutHuyDoiPin" class="nut-huy">Hủy</button>
+        </div>
+
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Danh Sách Công Việc</h3>
+                <button id="nutMoFormGiaoViec">+ Giao Việc Mới</button>
+            </div>
+
+            <div id="formGiaoViec" class="vung-admin an-di" style="background-color: #e8f5e9; border-color: #4CAF50;">
+                <h4>Giao Công Việc Mới</h4>
+                <input type="text" id="tieuDeCongViec" placeholder="Tiêu đề công việc">
+                <textarea id="noiDungCongViec" placeholder="Nội dung chi tiết"></textarea>
+                
+                <div style="margin: 8px 0;">
+                    <strong>Người nhận việc (Chọn một, nhiều người, hoặc bỏ trống):</strong>
+                    <div id="vungChonNguoiNhan" class="khung-chon-nhieu">
+                        </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <strong>Hạn chót:</strong>
+                        <input type="date" id="hanChotCongViec">
+                    </div>
+                    <div style="flex: 1;">
+                        <strong>Lặp lại:</strong>
+                        <select id="loaiLap">
+                            <option value="khong">Không lặp</option>
+                            <option value="ngay">Lặp hàng ngày</option>
+                            <option value="tuan">Lặp hàng tuần</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="nutTaoCongViec">Giao Việc</button>
+                <button id="nutHuyGiaoViec" class="nut-huy">Hủy</button>
+            </div>
+
+            <div style="margin: 15px 0;">
+                <label>Lọc trạng thái: </label>
+                <select id="locTrangThai">
+                    <option value="chua_hoan_thanh">Chưa hoàn thành</option>
+                    <option value="hoan_thanh">Đã hoàn thành</option>
+                    <option value="tat_ca">Tất cả</option>
+                </select>
+            </div>
+
+            <div id="vungDanhSachCongViec" class="danh-sach-cv">
+                </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, getDoc, query, where, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA5N6rOzYqiNt-fa5BmkCMaOLzFklCiwM8",
+        authDomain: "theodoiviec.firebaseapp.com",
+        databaseURL: "https://theodoiviec-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "theodoiviec",
+        storageBucket: "theodoiviec.firebasestorage.app",
+        messagingSenderId: "498664854899",
+        appId: "1:498664854899:web:5df1e7543cd7de4fbae106"
+    };
+
+    const ungDung = initializeApp(firebaseConfig);
+    const coSoDuLieu = getFirestore(ungDung);
+
+    let nguoiDungHienTai = null;
+    let phongBanHienTai = new URLSearchParams(window.location.search).get('phongban');
+    let danhSachTaiKhoan = [];
+
+    const manHinhDangNhap = document.getElementById('manHinhDangNhap');
+    const manHinhChinh = document.getElementById('manHinhChinh');
+    const khuVucAdmin = document.getElementById('khuVucAdmin');
+    const formGiaoViec = document.getElementById('formGiaoViec');
+    const vungDanhSachCongViec = document.getElementById('vungDanhSachCongViec');
+    const vungChonNguoiNhan = document.getElementById('vungChonNguoiNhan');
+    const locTrangThai = document.getElementById('locTrangThai');
+
+    async function taoAdminMacDinh() {
+        const q = query(collection(coSoDuLieu, "nguoiDung"), where("laAdmin", "==", true));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+            await addDoc(collection(coSoDuLieu, "nguoiDung"), {
+                ten: "Quản Trị Viên", tenDangNhap: "111111", laAdmin: true, phongBanId: "tong"
+            });
+        }
+    }
+
+    async function khoiTao() {
+        await taoAdminMacDinh();
+        const duLieuLuu = localStorage.getItem('thongTinDangNhap');
+        if (duLieuLuu) {
+            nguoiDungHienTai = JSON.parse(duLieuLuu);
+            hienThiGiaoDienSauDangNhap();
+        }
+
+        document.getElementById('nutDangNhap').addEventListener('click', xuLyDangNhap);
+        document.getElementById('nutDangXuat').addEventListener('click', () => {
+            localStorage.removeItem('thongTinDangNhap'); location.reload();
+        });
+
+        document.getElementById('nutTaoPhongBan').addEventListener('click', xuLyTaoPhongBan);
+        document.getElementById('nutTaoTaiKhoan').addEventListener('click', xuLyTaoTaiKhoan);
+        document.getElementById('nutMoFormGiaoViec').addEventListener('click', () => formGiaoViec.classList.remove('an-di'));
+        document.getElementById('nutHuyGiaoViec').addEventListener('click', () => formGiaoViec.classList.add('an-di'));
+        document.getElementById('nutTaoCongViec').addEventListener('click', xuLyTaoCongViec);
+        locTrangThai.addEventListener('change', taiDanhSachCongViec);
+
+        document.getElementById('nutDoiPin').addEventListener('click', () => document.getElementById('khuVucDoiPin').classList.remove('an-di'));
+        document.getElementById('nutHuyDoiPin').addEventListener('click', () => document.getElementById('khuVucDoiPin').classList.add('an-di'));
+        document.getElementById('nutXacNhanDoiPin').addEventListener('click', xuLyDoiPin);
+    }
+
+    async function TruyVanNguoiDung(chuoiTaiKhoan) {
+        const qAdmin = query(collection(coSoDuLieu, "nguoiDung"), where("tenDangNhap", "==", chuoiTaiKhoan), where("laAdmin", "==", true));
+        const ketQuaAdmin = await getDocs(qAdmin);
+        if (!ketQuaAdmin.empty) {
+            let user = null;
+            ketQuaAdmin.forEach((doc) => { user = { id: doc.id, ...doc.data() }; });
+            return user;
+        }
+
+        if (chuoiTaiKhoan.length <= 4) return null;
+        const maPin = chuoiTaiKhoan.slice(-4);
+        const tenDangNhap = chuoiTaiKhoan.slice(0, -4);
+        const q = query(collection(coSoDuLieu, "nguoiDung"), where("tenDangNhap", "==", tenDangNhap), where("maPin", "==", maPin));
+        const ketQua = await getDocs(q);
+        if (ketQua.empty) return null;
+        
+        let user = null;
+        ketQua.forEach((doc) => { user = { id: doc.id, ...doc.data() }; });
+        return user;
+    }
+
+    async function xuLyDangNhap() {
+        const chuoiTaiKhoan = document.getElementById('oNhapTaiKhoan').value.trim();
+        const thongBao = document.getElementById('thongBaoDangNhap');
+        thongBao.innerText = "Đang kiểm tra...";
+
+        const thongTinUser = await TruyVanNguoiDung(chuoiTaiKhoan);
+        if (thongTinUser) {
+            if (!thongTinUser.laAdmin && thongTinUser.phongBanId !== phongBanHienTai) {
+                thongBao.innerText = "Tài khoản không thuộc phòng ban này hoặc link không hợp lệ!";
+                return;
+            }
+            nguoiDungHienTai = thongTinUser;
+            localStorage.setItem('thongTinDangNhap', JSON.stringify(thongTinUser));
+            thongBao.innerText = "";
+            hienThiGiaoDienSauDangNhap();
+        } else {
+            thongBao.innerText = "Sai thông tin đăng nhập!";
+        }
+    }
+
+    async function hienThiGiaoDienSauDangNhap() {
+        manHinhDangNhap.classList.add('an-di');
+        manHinhChinh.classList.remove('an-di');
+        document.getElementById('tenNguoiDungHienTai').innerText = `Xin chào, ${nguoiDungHienTai.ten || 'Admin'}`;
+
+        if (nguoiDungHienTai.laAdmin) {
+            khuVucAdmin.classList.remove('an-di');
+            taiDanhSachPhongBanChoAdmin();
+        } else {
+            document.getElementById('tenPhongBanHienTai').innerText = "Phòng làm việc"; 
+        }
+
+        taiDanhSachTaiKhoanPhongBan();
+        taiDanhSachCongViec();
+    }
+
+    async function xuLyDoiPin() {
+        const pinMoi = document.getElementById('pinMoi').value;
+        if (nguoiDungHienTai.laAdmin) {
+            if (pinMoi.trim() === "" || isNaN(pinMoi)) { alert("Thông tin đăng nhập của Admin phải là dãy số!"); return; }
+            await updateDoc(doc(coSoDuLieu, "nguoiDung", nguoiDungHienTai.id), { tenDangNhap: pinMoi });
+            nguoiDungHienTai.tenDangNhap = pinMoi;
+        } else {
+            if (pinMoi.length !== 4 || isNaN(pinMoi)) { alert("Mã PIN phải là 4 chữ số!"); return; }
+            await updateDoc(doc(coSoDuLieu, "nguoiDung", nguoiDungHienTai.id), { maPin: pinMoi });
+            nguoiDungHienTai.maPin = pinMoi;
+        }
+        localStorage.setItem('thongTinDangNhap', JSON.stringify(nguoiDungHienTai));
+        alert("Đổi thông tin thành công!");
+        document.getElementById('khuVucDoiPin').classList.add('an-di');
+    }
+
+    async function xuLyTaoPhongBan() {
+        const tenPB = document.getElementById('tenPhongBanMoi').value;
+        if (!tenPB) return;
+        const taoMoi = await addDoc(collection(coSoDuLieu, "phongBan"), { tenPhongBan: tenPB });
+        const link = `${window.location.origin}${window.location.pathname}?phongban=${taoMoi.id}`;
+        document.getElementById('linkPhongBanMoi').innerText = `Link phòng ${tenPB}: ${link}`;
+        taiDanhSachPhongBanChoAdmin();
+    }
+
+    async function taiDanhSachPhongBanChoAdmin() {
+        const q = query(collection(coSoDuLieu, "phongBan"));
+        const snap = await getDocs(q);
+        const oChon = document.getElementById('chonPhongBanDeTaoTK');
+        oChon.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
+        snap.forEach(d => { oChon.innerHTML += `<option value="${d.id}">${d.data().tenPhongBan}</option>`; });
+    }
+
+    async function xuLyTaoTaiKhoan() {
+        const pbId = document.getElementById('chonPhongBanDeTaoTK').value;
+        const ten = document.getElementById('tenNhanVienMoi').value;
+        const chuoiID = document.getElementById('chuoiDangNhapMoi').value;
+        const pin = document.getElementById('pinMacDinh').value;
+        if (!pbId || !ten || !chuoiID || pin.length !== 4) { alert("Vui lòng nhập đủ thông tin và PIN 4 số."); return; }
+        await addDoc(collection(coSoDuLieu, "nguoiDung"), { ten: ten, tenDangNhap: chuoiID, maPin: pin, phongBanId: pbId, laAdmin: false });
+        document.getElementById('thongBaoTaoTK').innerText = `Đã tạo: ${chuoiID}${pin}`;
+    }
+
+    async function taiDanhSachTaiKhoanPhongBan() {
+        let pId = phongBanHienTai || (nguoiDungHienTai.laAdmin ? document.getElementById('chonPhongBanDeTaoTK').value : nguoiDungHienTai.phongBanId); 
+        if(!pId) return;
+        const q = query(collection(coSoDuLieu, "nguoiDung"), where("phongBanId", "==", pId));
+        const snap = await getDocs(q);
+        
+        vungChonNguoiNhan.innerHTML = '';
+        danhSachTaiKhoan = [];
+        snap.forEach(d => {
+            const nv = { id: d.id, ...d.data() };
+            danhSachTaiKhoan.push(nv);
+            vungChonNguoiNhan.innerHTML += `<label><input type="checkbox" class="cb-nguoi-nhan" value="${nv.id}"> ${nv.ten}</label>`;
+        });
+    }
+
+    async function xuLyTaoCongViec() {
+        const tieuDe = document.getElementById('tieuDeCongViec').value;
+        const noiDung = document.getElementById('noiDungCongViec').value;
+        const hanChot = document.getElementById('hanChotCongViec').value;
+        const loaiLap = document.getElementById('loaiLap').value;
+
+        if (!tieuDe || !hanChot) { alert("Vui lòng nhập đủ tiêu đề và hạn chót!"); return; }
+
+        const cacHopKiem = document.querySelectorAll('.cb-nguoi-nhan:checked');
+        let mangNguoiNhan = Array.from(cacHopKiem).map(cb => cb.value);
+        
+        let tienDoKhoiTao = {};
+        mangNguoiNhan.forEach(id => {
+            tienDoKhoiTao[id] = { trangThai: "chua_hoan_thanh", ghiChu: "", yeuCauGiaHan: false };
+        });
+
+        await addDoc(collection(coSoDuLieu, "congViec"), {
+            tieuDe: tieuDe, noiDung: noiDung, nguoiGiaoId: nguoiDungHienTai.id,
+            danhSachNguoiNhan: mangNguoiNhan, tienDo: tienDoKhoiTao,
+            trangThaiChung: "chua_hoan_thanh", loaiLap: loaiLap, daTaoBanSao: false,
+            phongBanId: phongBanHienTai || nguoiDungHienTai.phongBanId, hanChot: hanChot
+        });
+
+        alert("Đã tạo công việc!");
+        formGiaoViec.classList.add('an-di');
+        taiDanhSachCongViec();
+    }
+
+    function taiDanhSachCongViec() {
+        const idPhong = phongBanHienTai || nguoiDungHienTai.phongBanId;
+        if (!idPhong) return;
+
+        const q = query(collection(coSoDuLieu, "congViec"), where("phongBanId", "==", idPhong));
+        
+        onSnapshot(q, (snap) => {
+            vungDanhSachCongViec.innerHTML = "";
+            const loc = locTrangThai.value;
+            let mangCongViec = [];
+
+            snap.forEach(d => mangCongViec.push({ id: d.id, ...d.data() }));
+            mangCongViec.sort((a, b) => new Date(a.hanChot) - new Date(b.hanChot));
+
+            mangCongViec.forEach(cv => {
+                // Hỗ trợ dữ liệu cũ
+                if (cv.nguoiNhanId && !cv.danhSachNguoiNhan) {
+                    cv.danhSachNguoiNhan = [cv.nguoiNhanId];
+                    cv.tienDo = { [cv.nguoiNhanId]: { trangThai: cv.trangThai, ghiChu: cv.ghiChu || "", yeuCauGiaHan: cv.yeuCauGiaHan || false } };
+                }
+                if (!cv.danhSachNguoiNhan) cv.danhSachNguoiNhan = [];
+                if (!cv.tienDo) cv.tienDo = {};
+                if (!cv.loaiLap) cv.loaiLap = 'khong';
+
+                let daXong = false;
+                if (cv.danhSachNguoiNhan.length === 0) {
+                    daXong = (cv.trangThaiChung === 'hoan_thanh');
+                } else {
+                    daXong = cv.danhSachNguoiNhan.every(id => cv.tienDo[id] && cv.tienDo[id].trangThai === 'hoan_thanh');
+                }
+
+                if (loc === "chua_hoan_thanh" && daXong) return;
+                if (loc === "hoan_thanh" && !daXong) return;
+                
+                taoTheCongViec(cv, daXong);
+            });
+        });
+    }
+
+    function taoTheCongViec(cv, daXong) {
+        const the = document.createElement('div');
+        the.className = 'the-cong-viec';
+        
+        const homNay = new Date(); homNay.setHours(0,0,0,0);
+        const ngayHan = new Date(cv.hanChot);
+        const soNgayConLai = Math.ceil((ngayHan - homNay) / (1000 * 60 * 60 * 24));
+
+        let classHan = "";
+        let textHan = `Còn ${soNgayConLai} ngày`;
+        let coNguoiYeuCauGiaHan = false;
+        
+        cv.danhSachNguoiNhan.forEach(id => {
+            if(cv.tienDo[id] && cv.tienDo[id].yeuCauGiaHan) coNguoiYeuCauGiaHan = true;
+        });
+
+        if (!daXong) {
+            if (soNgayConLai < 0) { classHan = "qua-han"; textHan = "ĐÃ QUÁ HẠN!"; }
+            else if (soNgayConLai === 0 || soNgayConLai === 1) { classHan = "han-1-ngay"; textHan = "Hết hạn trong hôm nay/ngày mai!"; }
+            else if (soNgayConLai === 2) classHan = "han-2-ngay";
+            else if (soNgayConLai === 3) classHan = "han-3-ngay";
+            if (coNguoiYeuCauGiaHan) classHan += " dang-yeu-cau-gia-han";
+        } else {
+            textHan = "Đã hoàn thành toàn bộ";
+        }
+
+        the.className += ` ${classHan}`;
+
+        const timNguoi = (id) => { const n = danhSachTaiKhoan.find(x => x.id === id); return n ? n.ten : "Không rõ"; };
+        let textLap = "";
+        if (cv.loaiLap === 'ngay') textLap = " (🔁 Lặp hàng ngày)";
+        if (cv.loaiLap === 'tuan') textLap = " (🔁 Lặp hàng tuần)";
+
+        let html = `
+            <h4>${cv.tieuDe} <span style="font-size:14px; color:#2196F3;">${textLap}</span> <span style="float:right; font-size:12px; color:red;">${coNguoiYeuCauGiaHan ? '🔥 CÓ YÊU CẦU GIA HẠN' : ''}</span></h4>
+            <p><strong>Hạn chót:</strong> ${cv.hanChot} <i>(${textHan})</i></p>
+            <p><strong>Người giao:</strong> ${timNguoi(cv.nguoiGiaoId)}</p>
+            <p><strong>Nội dung:</strong> ${cv.noiDung}</p>
+            <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <strong>Tiến độ chi tiết:</strong>
+        `;
+
+        if (cv.danhSachNguoiNhan.length === 0) {
+            html += `<p style="color: gray;"><i>Không giao cho cá nhân cụ thể. Trạng thái: ${daXong ? '✅ Đã xong' : '⏳ Đang chờ'}</i></p>`;
+        } else {
+            html += `<ul style="margin: 5px 0; padding-left: 20px;">`;
+            cv.danhSachNguoiNhan.forEach(id => {
+                const td = cv.tienDo[id];
+                html += `<li style="margin-bottom: 5px;">
+                    <strong>${timNguoi(id)}:</strong> 
+                    ${td.trangThai === 'hoan_thanh' ? '✅ Đã xong' : '⏳ Đang làm'}
+                    ${td.ghiChu ? ` - <i>Ghi chú: ${td.ghiChu}</i>` : ''}
+                    ${td.yeuCauGiaHan ? ' - <strong style="color:red">🔥 Xin gia hạn</strong>' : ''}
+                </li>`;
+            });
+            html += `</ul>`;
+        }
+        
+        html += `</div><div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">`;
+
+        // Nút cập nhật cho người được giao việc
+        if (cv.danhSachNguoiNhan.includes(nguoiDungHienTai.id)) {
+            const tdCuaToi = cv.tienDo[nguoiDungHienTai.id];
+            if (tdCuaToi && tdCuaToi.trangThai !== 'hoan_thanh') {
+                html += `
+                    <button class="nut-nho" onclick="window.capNhatTienDoCaNhan('${cv.id}', '${nguoiDungHienTai.id}', 'hoan_thanh')">Đánh dấu Hoàn thành (Phần của tôi)</button>
+                    <button class="nut-nho" style="background-color: #2196F3;" onclick="window.themGhiChuCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Thêm Ghi chú</button>
+                    <button class="nut-nho" style="background-color: #e91e63;" onclick="window.yeuCauGiaHanCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Yêu cầu Gia hạn</button>
+                `;
+            }
+        }
+
+        // Nếu công việc không giao ai, người tạo hoặc admin có thể tự đóng
+        if (cv.danhSachNguoiNhan.length === 0 && !daXong && (cv.nguoiGiaoId === nguoiDungHienTai.id || nguoiDungHienTai.laAdmin)) {
+            html += `<button class="nut-nho" onclick="window.capNhatTienDoChung('${cv.id}', 'hoan_thanh')">Đánh dấu Hoàn thành toàn bộ</button>`;
+        }
+
+        // Nút duyệt gia hạn dành cho người giao
+        if (cv.nguoiGiaoId === nguoiDungHienTai.id && coNguoiYeuCauGiaHan && !daXong) {
+            html += `<button class="nut-nho" style="background-color: #ff9800;" onclick="window.duyetGiaHan('${cv.id}')">Cập nhật hạn mới</button>`;
+        }
+
+        html += `</div>`;
+        the.innerHTML = html;
+        vungDanhSachCongViec.appendChild(the);
+    }
+
+    // Các hàm cập nhật
+    window.capNhatTienDoCaNhan = async (idCv, idUser, trangThai) => {
+        if(confirm("Xác nhận hoàn thành phần việc của bạn?")) {
+            await updateDoc(doc(coSoDuLieu, "congViec", idCv), { 
+                [`tienDo.${idUser}.trangThai`]: trangThai,
+                [`tienDo.${idUser}.yeuCauGiaHan`]: false
+            });
+            await kiemTraVaLapCongViec(idCv);
+        }
+    };
+
+    window.themGhiChuCaNhan = async (idCv, idUser) => {
+        const nhapGC = prompt("Nhập ghi chú tiến độ:");
+        if (nhapGC) await updateDoc(doc(coSoDuLieu, "congViec", idCv), { [`tienDo.${idUser}.ghiChu`]: nhapGC });
+    };
+
+    window.yeuCauGiaHanCaNhan = async (idCv, idUser) => {
+        if(confirm("Gửi yêu cầu gia hạn đến người giao việc?")) {
+            await updateDoc(doc(coSoDuLieu, "congViec", idCv), { [`tienDo.${idUser}.yeuCauGiaHan`]: true });
+        }
+    };
+
+    window.capNhatTienDoChung = async (idCv, trangThai) => {
+        if(confirm("Xác nhận đánh dấu hoàn thành toàn bộ công việc này?")) {
+            await updateDoc(doc(coSoDuLieu, "congViec", idCv), { trangThaiChung: trangThai });
+            await kiemTraVaLapCongViec(idCv);
+        }
+    };
+
+    window.duyetGiaHan = async (idCv) => {
+        const hanMoi = prompt("Nhập ngày hạn chót mới (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+        if (hanMoi) {
+            const banGhi = await getDoc(doc(coSoDuLieu, "congViec", idCv));
+            if (!banGhi.exists()) return;
+            const cv = banGhi.data();
+            let capNhat = { hanChot: hanMoi };
+            if (cv.danhSachNguoiNhan && cv.danhSachNguoiNhan.length > 0) {
+                cv.danhSachNguoiNhan.forEach(id => { capNhat[`tienDo.${id}.yeuCauGiaHan`] = false; });
+            }
+            await updateDoc(doc(coSoDuLieu, "congViec", idCv), capNhat);
+        }
+    };
+
+    // Hàm kiểm tra nhân bản công việc lặp lại
+    async function kiemTraVaLapCongViec(idCv) {
+        const banGhi = await getDoc(doc(coSoDuLieu, "congViec", idCv));
+        if (!banGhi.exists()) return;
+        const cv = banGhi.data();
+        
+        let daXong = false;
+        if (cv.danhSachNguoiNhan.length === 0) {
+            daXong = (cv.trangThaiChung === 'hoan_thanh');
+        } else {
+            daXong = cv.danhSachNguoiNhan.every(id => cv.tienDo[id] && cv.tienDo[id].trangThai === 'hoan_thanh');
+        }
+
+        if (daXong && cv.loaiLap !== 'khong' && !cv.daTaoBanSao) {
+            await updateDoc(doc(coSoDuLieu, "congViec", idCv), { daTaoBanSao: true });
+
+            let ngayMoi = new Date(cv.hanChot);
+            if (cv.loaiLap === 'ngay') ngayMoi.setDate(ngayMoi.getDate() + 1);
+            if (cv.loaiLap === 'tuan') ngayMoi.setDate(ngayMoi.getDate() + 7);
+            let hanChotMoi = ngayMoi.toISOString().split('T')[0];
+
+            let tienDoMoi = {};
+            if (cv.danhSachNguoiNhan) {
+                cv.danhSachNguoiNhan.forEach(id => {
+                    tienDoMoi[id] = { trangThai: "chua_hoan_thanh", ghiChu: "", yeuCauGiaHan: false };
+                });
+            }
+
+            await addDoc(collection(coSoDuLieu, "congViec"), {
+                tieuDe: cv.tieuDe, noiDung: cv.noiDung, nguoiGiaoId: cv.nguoiGiaoId,
+                danhSachNguoiNhan: cv.danhSachNguoiNhan, tienDo: tienDoMoi,
+                trangThaiChung: "chua_hoan_thanh", loaiLap: cv.loaiLap, daTaoBanSao: false,
+                phongBanId: cv.phongBanId, hanChot: hanChotMoi
+            });
+        }
+    }
+
+    khoiTao();
+</script>
+
+</body>
+</html>
