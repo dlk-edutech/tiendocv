@@ -906,7 +906,7 @@
                 const tdCuaToi = cv.tienDo[nguoiDungHienTai.id];
                 if (tdCuaToi && tdCuaToi.trangThai !== 'hoan_thanh') {
                     htmlNut += `
-                        <button class="nut-nho" style="margin: 0;" onclick="window.capNhatTienDoCaNhan('${cv.id}', '${nguoiDungHienTai.id}', 'hoan_thanh')">Xong (Phần tôi)</button>
+                        <button class="nut-nho" style="margin: 0;" onclick="window.capNhatTienDoCaNhan('${cv.id}', '${nguoiDungHienTai.id}', 'hoan_thanh')">Hoàn thành</button>
                         <button class="nut-nho" style="background-color: #2196F3; margin: 0;" onclick="window.themGhiChuCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Ghi chú</button>
                         <button class="nut-nho" style="background-color: #e91e63; margin: 0;" onclick="window.yeuCauGiaHanCaNhan('${cv.id}', '${nguoiDungHienTai.id}')">Xin Gia hạn</button>
                     `;
@@ -917,7 +917,6 @@
                 htmlNut += `<button class="nut-nho" style="margin: 0;" onclick="window.capNhatTienDoChung('${cv.id}', 'hoan_thanh')">Đánh dấu Xong hết</button>`;
             }
 
-            // Nút Sửa & Xóa cho người giao hoặc admin
             if (cv.nguoiGiaoId === nguoiDungHienTai.id || nguoiDungHienTai.laAdmin) {
                 htmlNut += `
                     <div style="display: flex; gap: 5px;">
@@ -948,7 +947,6 @@
         vungDanhSachCongViec.appendChild(the);
     }
 
-    // Window functions
     window.yeuCauDangNhap = () => {
         modalDangNhap.classList.remove('an-di');
     };
@@ -980,7 +978,6 @@
         }
     };
 
-    // --- CHỨC NĂNG SỬA & XÓA CÔNG VIỆC ---
     window.xoaCongViec = async (idCv) => {
         if(confirm("Bạn có chắc chắn muốn XÓA công việc này?")) {
             try {
@@ -996,7 +993,7 @@
         if (!cv) return;
         
         let noiDungFull = cv.tieuDe;
-        if (cv.noiDung) noiDungFull += " - " + cv.noiDung; // Hỗ trợ data cũ
+        if (cv.noiDung) noiDungFull += " - " + cv.noiDung; 
 
         document.getElementById('idCongViecCanSua').value = idCv;
         document.getElementById('suaNoiDungCongViec').value = noiDungFull;
@@ -1014,7 +1011,6 @@
         const cv = mangCongViecToanCuc.find(x => x.id === id);
         let capNhat = { tieuDe: noiDungMoi, noiDung: "", hanChot: hanChotMoi };
 
-        // Xóa cờ yêu cầu gia hạn của tất cả mọi người khi sửa
         if (cv && cv.danhSachNguoiNhan) {
             cv.danhSachNguoiNhan.forEach(uid => {
                 capNhat[`tienDo.${uid}.yeuCauGiaHan`] = false;
@@ -1059,7 +1055,6 @@
         }
     }
 
-    // Bắt đầu chạy
     khoiTao();
 </script>
 
