@@ -130,18 +130,22 @@
                     <div style="flex: 1; min-width: 300px;">
                         <h4>Tạo Phòng Ban Mới</h4>
                         <input type="text" id="tenPhongBanMoi" placeholder="Tên phòng ban (VD: Kế Toán)">
-                        <button id="nutTaoPhongBan" style="background-color: #2196F3;">Tạo & Lấy Link</button>
+                        <button id="nutTaoPhongBan" style="background-color: #4CAF50;">Tạo Phòng Ban</button>
                         <p id="linkPhongBanMoi" style="word-break: break-all; color: green; font-size: 13px;"></p>
                     </div>
                     <div style="flex: 1; min-width: 300px; border-left: 1px dashed #ccc; padding-left: 20px;">
-                        <h4>Sửa / Xóa Phòng Ban</h4>
-                        <select id="chonPhongBanDeSua"><option value="">-- Chọn phòng ban --</option></select>
-                        <input type="text" id="suaTenPhongBan" placeholder="Tên phòng ban mới">
+                        <h4>Cập Nhật / Xóa / Lấy Link</h4>
+                        <select id="chonPhongBanDeSua"><option value="">-- Chọn phòng ban đã tạo --</option></select>
+                        <input type="text" id="suaTenPhongBan" placeholder="Tên phòng ban mới (để cập nhật)">
                         <div style="display: flex; gap: 10px;">
                             <button id="nutLuuPhongBan" style="background-color: #ff9800; flex: 1;">Cập Nhật</button>
                             <button id="nutXoaPhongBan" class="nut-huy" style="flex: 1;">Xóa</button>
+                            <button id="nutLayLinkPhongBan" style="background-color: #2196F3; flex: 1;">Lấy Link</button>
                         </div>
                         <p id="thongBaoSuaPB" style="color: green; font-size: 13px; margin-top: 10px;"></p>
+                        <div id="vungHienThiLinkPB" style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 4px; display: none; word-break: break-all; font-size: 13px; color: #0277bd; border: 1px dashed #2196F3;">
+                            <strong>Link: </strong> <span id="linkPhongBanHienTai"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -336,9 +340,12 @@
         document.getElementById('chonPhongBanDeSua').addEventListener('change', (e) => {
             const pb = danhSachPhongBan.find(x => x.id === e.target.value);
             document.getElementById('suaTenPhongBan').value = pb ? pb.tenPhongBan : "";
+            document.getElementById('vungHienThiLinkPB').style.display = "none"; // Ẩn link cũ
+            document.getElementById('thongBaoSuaPB').innerText = "";
         });
         document.getElementById('nutLuuPhongBan').addEventListener('click', xuLySuaPhongBan);
         document.getElementById('nutXoaPhongBan').addEventListener('click', xuLyXoaPhongBan);
+        document.getElementById('nutLayLinkPhongBan').addEventListener('click', xuLyLayLinkPhongBan); // Nút lấy link
 
         document.getElementById('nutTaoTaiKhoan').addEventListener('click', xuLyTaoTaiKhoan);
         document.getElementById('nutNhapExcel').addEventListener('click', xuLyNhapExcel);
@@ -571,7 +578,7 @@
             }
             await setDoc(doc(coSoDuLieu, "phongBan", maPB), { tenPhongBan: tenPB });
             const link = `${window.location.origin}${window.location.pathname}?phongban=${maPB}`;
-            document.getElementById('linkPhongBanMoi').innerText = `Link phòng: ${link}`;
+            document.getElementById('linkPhongBanMoi').innerText = `Tạo thành công. Link: ${link}`;
             document.getElementById('tenPhongBanMoi').value = "";
             taiDanhSachPhongBanChoAdmin();
         } catch (loi) {}
@@ -602,9 +609,27 @@
                 tb.innerText = "Đã xóa phòng ban thành công!";
                 setTimeout(() => { tb.innerText = ""; }, 3000);
                 document.getElementById('suaTenPhongBan').value = "";
+                document.getElementById('vungHienThiLinkPB').style.display = "none";
                 taiDanhSachPhongBanChoAdmin();
             } catch(e) { alert("Lỗi khi xóa phòng ban!"); }
         }
+    }
+
+    // Hàm chức năng: Lấy Link cho phòng ban đã tạo
+    function xuLyLayLinkPhongBan() {
+        const id = document.getElementById('chonPhongBanDeSua').value;
+        const vungHienThi = document.getElementById('vungHienThiLinkPB');
+        const oLink = document.getElementById('linkPhongBanHienTai');
+        
+        if(!id) {
+            alert("Vui lòng chọn phòng ban từ danh sách để lấy link!");
+            vungHienThi.style.display = "none";
+            return;
+        }
+
+        const link = `${window.location.origin}${window.location.pathname}?phongban=${id}`;
+        oLink.innerText = link;
+        vungHienThi.style.display = "block";
     }
 
     async function taiDanhSachPhongBanChoAdmin() {
