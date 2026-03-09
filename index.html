@@ -61,8 +61,10 @@
         .noi-dung-tab-admin { padding: 10px 0; }
 
         /* Vùng chọn nhiều người nhận */
-        .khung-chon-nhieu { max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: white; }
-        .khung-chon-nhieu label { display: block; margin-bottom: 5px; cursor: pointer; }
+        .khung-chon-nhieu { max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: white; }
+        .khung-chon-nhieu label { display: flex; align-items: center; margin-bottom: 5px; cursor: pointer; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
+        .khung-chon-nhieu label:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .khung-chon-nhieu input[type="checkbox"] { width: auto; margin: 0 10px 0 0; }
 
         /* Footer Bản quyền */
         .chan-trang { text-align: center; margin-top: 30px; font-size: 13px; color: #666; padding-top: 15px; border-top: 1px solid #eee; }
@@ -237,6 +239,7 @@
                     </select>
 
                     <strong>Người nhận việc (Chọn một, nhiều người, hoặc bỏ trống):</strong>
+                    <input type="text" id="timKiemNguoiNhan" placeholder="Tìm kiếm tên nhân viên..." style="margin-bottom: 8px; padding: 8px;">
                     <div id="vungChonNguoiNhan" class="khung-chon-nhieu">
                         </div>
                 </div>
@@ -393,13 +396,27 @@
             localStorage.removeItem('thongTinDangNhap'); location.reload();
         });
 
+        // Xử lý nút mở form giao việc và reset ô tìm kiếm
         document.getElementById('nutMoFormGiaoViec').addEventListener('click', () => {
             if (!nguoiDungHienTai) { modalDangNhap.classList.remove('an-di'); return; }
+            document.getElementById('timKiemNguoiNhan').value = "";
+            const cacNhanVien = document.getElementById('vungChonNguoiNhan').querySelectorAll('label');
+            cacNhanVien.forEach(l => l.style.display = 'flex');
             formGiaoViec.classList.remove('an-di');
         });
         document.getElementById('nutHuyGiaoViec').addEventListener('click', () => formGiaoViec.classList.add('an-di'));
         document.getElementById('nutTaoCongViec').addEventListener('click', xuLyTaoCongViec);
         
+        // Tính năng tìm kiếm người nhận
+        document.getElementById('timKiemNguoiNhan').addEventListener('input', (e) => {
+            const tuKhoa = e.target.value.toLowerCase();
+            const cacNhanVien = document.getElementById('vungChonNguoiNhan').querySelectorAll('label');
+            cacNhanVien.forEach(nhanVien => {
+                const ten = nhanVien.textContent.toLowerCase();
+                nhanVien.style.display = ten.includes(tuKhoa) ? 'flex' : 'none';
+            });
+        });
+
         document.getElementById('nutTaoPhongBan').addEventListener('click', xuLyTaoPhongBan);
         document.getElementById('chonPhongBanDeSua').addEventListener('change', (e) => {
             const pb = danhSachPhongBan.find(x => x.id === e.target.value);
