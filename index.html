@@ -14,7 +14,7 @@
         /* Tiêu đề chung */
         .vung-tieu-de { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #2196F3; padding-bottom: 15px; }
         .tieu-de-so { margin: 0; color: #d32f2f; font-size: 22px; text-transform: uppercase; }
-        .tieu-de-don-vi { margin: 5px 0 0 0; color: #1976d2; font-size: 20px; font-weight: bold; text-transform: uppercase; }
+        .tieu-de-don-vi { margin: 0; color: #1976d2; font-size: 20px; font-weight: bold; text-transform: uppercase; }
 
         /* Form và Nút bấm */
         input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
@@ -103,19 +103,21 @@
 <div class="khung-chinh">
     <div class="vung-tieu-de">
         <h2 id="hienThiTieuDeSo" class="tieu-de-so">SỞ GD&ĐT ĐẮK LẮK</h2>
-        <h3 id="hienThiTieuDeDonVi" class="tieu-de-don-vi">ĐƠN VỊ</h3>
+        <div style="position: relative; display: flex; justify-content: center; align-items: center; margin-top: 5px;">
+            <h3 id="hienThiTieuDeDonVi" class="tieu-de-don-vi">ĐƠN VỊ</h3>
+            <div style="position: absolute; right: 0;">
+                <button id="nutMoDangNhap" class="nut-nho" style="background-color: #2196F3; margin: 0;">Đăng Nhập</button>
+                <button id="nutDoiPin" class="nut-nho an-di" style="background-color: #ff9800; margin: 0;">Đổi thông tin</button>
+                <button id="nutDangXuat" class="nut-nho nut-huy an-di" style="margin: 0;">Đăng Xuất</button>
+            </div>
+        </div>
     </div>
 
     <div id="manHinhChinh">
-        <div class="thanh-cong-cu">
+        <div id="thanhCongCu" class="thanh-cong-cu an-di">
             <div>
-                <span id="tenNguoiDungHienTai">Khách (Chỉ xem)</span>
+                <span id="tenNguoiDungHienTai"></span>
                 <span id="tenPhongBanHienTai" style="font-weight: bold; color: #2196F3; margin-left: 10px;"></span>
-            </div>
-            <div>
-                <button id="nutMoDangNhap" class="nut-nho" style="background-color: #2196F3;">Đăng Nhập</button>
-                <button id="nutDoiPin" class="nut-nho an-di" style="background-color: #ff9800;">Đổi thông tin</button>
-                <button id="nutDangXuat" class="nut-nho nut-huy an-di">Đăng Xuất</button>
             </div>
         </div>
 
@@ -222,7 +224,7 @@
         <div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3>Danh Sách Công Việc</h3>
-                <button id="nutMoFormGiaoViec">+ Giao Việc Mới</button>
+                <button id="nutMoFormGiaoViec" class="an-di">+ Giao Việc Mới</button>
             </div>
 
             <div id="formGiaoViec" class="vung-admin an-di" style="background-color: #e8f5e9; border-color: #4CAF50;">
@@ -372,6 +374,15 @@
         ma = ma.replace(/\s+/g, ""); 
         ma = ma.replace(/[^a-z0-9]/g, ""); 
         return ma;
+    }
+
+    function dinhDangNgayVN(chuoiNgay) {
+        if (!chuoiNgay) return "";
+        const mang = chuoiNgay.split('-');
+        if (mang.length === 3) {
+            return `${mang[2]}/${mang[1]}/${mang[0]}`;
+        }
+        return chuoiNgay;
     }
 
     async function khoiTao() {
@@ -597,6 +608,8 @@
         document.getElementById('nutMoDangNhap').classList.add('an-di');
         document.getElementById('nutDoiPin').classList.remove('an-di');
         document.getElementById('nutDangXuat').classList.remove('an-di');
+        document.getElementById('nutMoFormGiaoViec').classList.remove('an-di');
+        document.getElementById('thanhCongCu').classList.remove('an-di');
 
         let chucDanh = layTenVaiTro(nguoiDungHienTai);
         document.getElementById('tenNguoiDungHienTai').innerText = `Xin chào, ${nguoiDungHienTai.ten || 'Admin'} (${chucDanh})`;
@@ -904,7 +917,7 @@
             return {
                 "Phòng Ban": timPhong(cv.phongBanId),
                 "Công Việc": noiDungFull,
-                "Hạn Chót": cv.hanChot,
+                "Hạn Chót": dinhDangNgayVN(cv.hanChot),
                 "Người Giao": nguoiGiao,
                 "Người Nhận": nguoiNhan,
                 "Trạng Thái": daXong ? "Đã Hoàn Thành" : "Chưa Xong"
@@ -1124,7 +1137,7 @@
                 ${coNguoiYeuCauGiaHan ? '<span style="font-size:12px; color:red; font-weight:bold; display:block; margin-top:3px;">🔥 CÓ YÊU CẦU GIA HẠN</span>' : ''}
             </td>
             <td style="white-space: nowrap;">
-                <strong>${cv.hanChot}</strong><br>
+                <strong>${dinhDangNgayVN(cv.hanChot)}</strong><br>
                 <span style="font-size: 13px; color: #555;">${textHan}</span>
             </td>
             <td>${timNguoi(cv.nguoiGiaoId)}</td>
