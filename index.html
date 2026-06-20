@@ -34,6 +34,7 @@
         .bang-cong-viec th, .bang-cong-viec td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
         .bang-cong-viec th { background-color: #f4f7f6; font-weight: bold; border-bottom: 2px solid #ccc; }
         .bang-cong-viec tr:hover { background-color: #f9f9f9; }
+        .o-han-chot { white-space: nowrap; }
         
         /* Highlight theo ngay tren Bang */
         .han-1-ngay > td { background-color: #ffe6e6 !important; border-top: 1px solid #ff0000; border-bottom: 1px solid #ff0000; }
@@ -69,72 +70,80 @@
         /* Footer Ban quyen */
         .chan-trang { text-align: center; margin-top: 30px; font-size: 13px; color: #666; padding-top: 15px; border-top: 1px solid #eee; }
 
-        /* RESPONSIVE: Giao dien the cho man hinh doc */
+        /* RESPONSIVE: Giao dien the cho man hinh doc (Portrait) */
         @media screen and (max-width: 768px) {
             body { padding: 10px; }
-            .khung-chinh { padding: 15px; }
-            .vung-tieu-de > div { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
-            .vung-tieu-de > div > div { position: static !important; display: flex; gap: 10px; width: 100%; justify-content: center; flex-wrap: wrap; }
-            .vung-tieu-de > div > div > button { margin-top: 0; }
+            .khung-chinh { padding: 10px; }
             
-            .khung-bang { border: none; overflow-x: hidden; background: transparent; margin-top: 10px; }
-            .bang-cong-viec, .bang-cong-viec tbody, .bang-cong-viec tr, .bang-cong-viec td { display: block; width: 100%; box-sizing: border-box; }
+            .vung-tieu-de > div { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+            .vung-tieu-de > div > div { position: static !important; display: flex; gap: 8px; width: 100%; justify-content: center; flex-wrap: wrap; }
+            
+            .khung-bang { border: none !important; overflow: visible !important; background: transparent; margin-top: 10px; }
+            
+            /* Triet tieu min-width 850px cua desktop de bang khong bi tran sang phai */
+            .bang-cong-viec, .bang-cong-viec tbody { display: block; width: 100% !important; min-width: 0 !important; }
             .bang-cong-viec thead { display: none; }
             
             .bang-cong-viec tr { 
+                display: block;
+                width: 100% !important; 
+                box-sizing: border-box;
                 margin-bottom: 20px; 
-                border: 1px solid #e0e0e0 !important; 
+                border: 1px solid #cfd8dc !important; 
                 border-radius: 12px; 
-                padding: 15px; 
+                padding: 14px; 
                 background-color: #fff; 
-                box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+                box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
                 position: relative; 
             }
-            .bang-cong-viec td { 
-                border-bottom: 1px dashed #eee !important; 
-                padding: 10px 0; 
-                text-align: left !important; 
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-            }
-            .bang-cong-viec td:last-child { border-bottom: none !important; padding-bottom: 0; }
             
-            /* Them nhan cho moi dong du lieu tren the */
+            /* Ve dung block de noi dung text va ul tu dong day the chieu doc */
+            .bang-cong-viec td { 
+                display: block !important; 
+                width: 100% !important;
+                box-sizing: border-box;
+                border-bottom: 1px dashed #eee !important; 
+                padding: 10px 0 !important; 
+                text-align: left !important; 
+                white-space: normal !important; /* Ghi de mo-pin nowrap cua cot han chot */
+                word-break: break-word; 
+                overflow-wrap: break-word;
+            }
+            .bang-cong-viec td:last-child { border-bottom: none !important; padding-bottom: 0 !important; }
+            
+            /* Tag tieu de cua tung muc ben trong the */
             .bang-cong-viec td::before { 
                 content: attr(data-nhan); 
-                display: inline-block; 
+                display: block; 
                 font-weight: 700; 
-                color: #1976d2; 
-                font-size: 12px; 
+                color: #0288d1; 
+                font-size: 11px; 
                 text-transform: uppercase; 
-                background: #e3f2fd;
+                background: #e1f5fe;
                 padding: 4px 8px;
                 border-radius: 4px;
-                align-self: flex-start;
+                margin-bottom: 6px;
+                width: fit-content;
             }
             
-            /* Sap xep cac nut thao tac khong de nhau */
+            /* Khung thao tac chua cac nut bam tren mobile */
             .bang-cong-viec td:last-child > div { 
+                display: flex !important;
                 flex-direction: row !important; 
                 flex-wrap: wrap; 
                 gap: 8px; 
-                justify-content: space-between;
             }
             .bang-cong-viec td:last-child button { 
                 flex: 1 1 calc(50% - 8px); 
                 margin: 0 !important; 
-                padding: 12px 5px;
+                padding: 10px 5px;
                 font-size: 13px;
-                font-weight: bold;
-                border-radius: 6px;
             }
 
-            /* Can chinh cac khoi khac tren mobile */
             .thanh-cong-cu { flex-direction: column; align-items: flex-start; gap: 10px; }
             .thanh-tab-admin { flex-wrap: wrap; gap: 5px; }
             .tab-admin { flex: 1 1 100%; border-radius: 5px; text-align: center; }
-            .popup-modal { width: 90%; padding: 20px; box-sizing: border-box; }
+            .popup-modal { width: 92%; padding: 20px; box-sizing: border-box; }
         }
     </style>
 </head>
@@ -1206,7 +1215,7 @@
                 <span style="font-size:12px; color:#2196F3; display:block; margin-top: 5px;">${textLap}</span>
                 ${coNguoiYeuCauGiaHan ? '<span style="font-size:12px; color:red; font-weight:bold; display:block; margin-top:3px;">🔥 CÓ YÊU CẦU GIA HẠN</span>' : ''}
             </td>
-            <td data-nhan="Hạn chót" style="white-space: nowrap;">
+            <td data-nhan="Hạn chót" class="o-han-chot">
                 <strong>${dinhDangNgayVN(cv.hanChot)}</strong><br>
                 <span style="font-size: 13px; color: #555;">${textHan}</span>
             </td>
