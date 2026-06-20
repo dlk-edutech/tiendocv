@@ -11,12 +11,12 @@
         h1, h2, h3 { color: #333; }
         .an-di { display: none !important; }
         
-        /* Tiêu đề chung */
+        /* Tieu de chung */
         .vung-tieu-de { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #2196F3; padding-bottom: 15px; }
         .tieu-de-so { margin: 0; color: #d32f2f; font-size: 22px; text-transform: uppercase; }
         .tieu-de-don-vi { margin: 0; color: #1976d2; font-size: 20px; font-weight: bold; text-transform: uppercase; }
 
-        /* Form và Nút bấm */
+        /* Form va Nut bam */
         input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; transition: 0.2s; }
         button:hover { background-color: #45a049; }
@@ -28,20 +28,20 @@
         .nen-mo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; display: flex; align-items: center; justify-content: center; }
         .popup-modal { background: white; padding: 25px; border-radius: 8px; width: 350px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
 
-        /* Bảng công việc */
+        /* Bang cong viec */
         .khung-bang { overflow-x: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 6px; }
         .bang-cong-viec { width: 100%; border-collapse: collapse; background: #fff; min-width: 850px; }
         .bang-cong-viec th, .bang-cong-viec td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
         .bang-cong-viec th { background-color: #f4f7f6; font-weight: bold; border-bottom: 2px solid #ccc; }
         .bang-cong-viec tr:hover { background-color: #f9f9f9; }
         
-        /* Highlight theo ngày trên Bảng */
+        /* Highlight theo ngay tren Bang */
         .han-1-ngay > td { background-color: #ffe6e6 !important; border-top: 1px solid #ff0000; border-bottom: 1px solid #ff0000; }
         .han-2-ngay > td { background-color: #fff0e6 !important; border-top: 1px solid #ff9800; border-bottom: 1px solid #ff9800; }
         .han-3-ngay > td { background-color: #fffde7 !important; border-top: 1px solid #ffeb3b; border-bottom: 1px solid #ffeb3b; }
         .qua-han > td { background-color: #e0e0e0 !important; color: #555; border-top: 1px solid #555; border-bottom: 1px solid #555; }
         
-        /* Highlight Yêu cầu gia hạn */
+        /* Highlight Yeu cau gia han */
         .dang-yeu-cau-gia-han > td { animation: nhap-nhay-bang 1.5s infinite; border-top: 2px dashed #e91e63; border-bottom: 2px dashed #e91e63; }
         @keyframes nhap-nhay-bang {
             0% { background-color: rgba(233, 30, 99, 0.05); }
@@ -49,7 +49,7 @@
             100% { background-color: rgba(233, 30, 99, 0.05); }
         }
 
-        /* Phân chia layout Admin/User */
+        /* Phan chia layout Admin/User */
         .vung-admin { border: 1px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 5px; background-color: #e3f2fd; }
         .thanh-cong-cu { display: flex; justify-content: space-between; align-items: center; background: #eee; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
         
@@ -60,33 +60,81 @@
         .tab-admin:hover:not(.actived) { background-color: #d5d5d5; }
         .noi-dung-tab-admin { padding: 10px 0; }
 
-        /* Vùng chọn nhiều người nhận */
+        /* Vung chon nhieu nguoi nhan */
         .khung-chon-nhieu { max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: white; }
         .khung-chon-nhieu label { display: flex; align-items: center; margin-bottom: 5px; cursor: pointer; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
         .khung-chon-nhieu label:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .khung-chon-nhieu input[type="checkbox"] { width: auto; margin: 0 10px 0 0; }
 
-        /* Footer Bản quyền */
+        /* Footer Ban quyen */
         .chan-trang { text-align: center; margin-top: 30px; font-size: 13px; color: #666; padding-top: 15px; border-top: 1px solid #eee; }
 
-        /* RESPONSIVE: Giao diện thẻ cho màn hình dọc */
+        /* RESPONSIVE: Giao dien the cho man hinh doc */
         @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            .khung-chinh { padding: 15px; }
             .vung-tieu-de > div { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
-            .vung-tieu-de > div > div { position: static !important; display: flex; gap: 5px; width: 100%; justify-content: center; flex-wrap: wrap; }
+            .vung-tieu-de > div > div { position: static !important; display: flex; gap: 10px; width: 100%; justify-content: center; flex-wrap: wrap; }
+            .vung-tieu-de > div > div > button { margin-top: 0; }
             
-            .khung-bang { border: none; overflow-x: hidden; background: transparent; }
+            .khung-bang { border: none; overflow-x: hidden; background: transparent; margin-top: 10px; }
             .bang-cong-viec, .bang-cong-viec tbody, .bang-cong-viec tr, .bang-cong-viec td { display: block; width: 100%; box-sizing: border-box; }
             .bang-cong-viec thead { display: none; }
-            .bang-cong-viec tr { margin-bottom: 15px; border: 1px solid #ccc !important; border-radius: 8px; padding: 10px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
-            .bang-cong-viec td { border-bottom: 1px dashed #eee !important; padding: 8px 0; text-align: left !important; }
-            .bang-cong-viec td:last-child { border-bottom: none !important; }
             
-            /* Thêm nhãn cho mỗi dòng dữ liệu trên thẻ */
-            .bang-cong-viec td::before { content: attr(data-nhan); display: block; font-weight: bold; color: #1976d2; margin-bottom: 5px; font-size: 12px; text-transform: uppercase; }
+            .bang-cong-viec tr { 
+                margin-bottom: 20px; 
+                border: 1px solid #e0e0e0 !important; 
+                border-radius: 12px; 
+                padding: 15px; 
+                background-color: #fff; 
+                box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+                position: relative; 
+            }
+            .bang-cong-viec td { 
+                border-bottom: 1px dashed #eee !important; 
+                padding: 10px 0; 
+                text-align: left !important; 
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .bang-cong-viec td:last-child { border-bottom: none !important; padding-bottom: 0; }
             
-            /* Sắp xếp các nút thao tác không đè nhau */
-            .bang-cong-viec td:last-child > div { flex-direction: row !important; flex-wrap: wrap; gap: 5px; }
-            .bang-cong-viec td:last-child button { flex: 1 1 45%; margin: 0 !important; }
+            /* Them nhan cho moi dong du lieu tren the */
+            .bang-cong-viec td::before { 
+                content: attr(data-nhan); 
+                display: inline-block; 
+                font-weight: 700; 
+                color: #1976d2; 
+                font-size: 12px; 
+                text-transform: uppercase; 
+                background: #e3f2fd;
+                padding: 4px 8px;
+                border-radius: 4px;
+                align-self: flex-start;
+            }
+            
+            /* Sap xep cac nut thao tac khong de nhau */
+            .bang-cong-viec td:last-child > div { 
+                flex-direction: row !important; 
+                flex-wrap: wrap; 
+                gap: 8px; 
+                justify-content: space-between;
+            }
+            .bang-cong-viec td:last-child button { 
+                flex: 1 1 calc(50% - 8px); 
+                margin: 0 !important; 
+                padding: 12px 5px;
+                font-size: 13px;
+                font-weight: bold;
+                border-radius: 6px;
+            }
+
+            /* Can chinh cac khoi khac tren mobile */
+            .thanh-cong-cu { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .thanh-tab-admin { flex-wrap: wrap; gap: 5px; }
+            .tab-admin { flex: 1 1 100%; border-radius: 5px; text-align: center; }
+            .popup-modal { width: 90%; padding: 20px; box-sizing: border-box; }
         }
     </style>
 </head>
@@ -356,7 +404,7 @@
     const locPhongBanAdmin = document.getElementById('locPhongBanAdmin');
     const chonPhongBanGiaoViec = document.getElementById('chonPhongBanGiaoViec');
 
-    // Các hàm Helper Quản lý Vai trò
+    // Cac ham Helper Quan ly Vai tro
     function kiemTraQuanLy(u) {
         if (!u) return false;
         const cacVaiTroQuanLy = ['hieu_truong', 'p_hieu_truong', 'to_truong', 'truong_ban', 'Hiệu trưởng', 'P. Hiệu trưởng', 'Tổ trưởng', 'Trưởng ban'];
@@ -428,7 +476,7 @@
             localStorage.removeItem('thongTinDangNhap'); location.reload();
         });
 
-        // Xử lý nút mở form giao việc và reset ô tìm kiếm
+        // Xu ly nut mo form giao viec va reset o tim kiem
         document.getElementById('nutMoFormGiaoViec').addEventListener('click', () => {
             if (!nguoiDungHienTai) { modalDangNhap.classList.remove('an-di'); return; }
             document.getElementById('timKiemNguoiNhan').value = "";
@@ -439,7 +487,7 @@
         document.getElementById('nutHuyGiaoViec').addEventListener('click', () => formGiaoViec.classList.add('an-di'));
         document.getElementById('nutTaoCongViec').addEventListener('click', xuLyTaoCongViec);
         
-        // Tính năng tìm kiếm người nhận
+        // Tinh nang tim kiem nguoi nhan
         document.getElementById('timKiemNguoiNhan').addEventListener('input', (e) => {
             const tuKhoa = e.target.value.toLowerCase();
             const cacNhanVien = document.getElementById('vungChonNguoiNhan').querySelectorAll('label');
@@ -499,7 +547,7 @@
             taiCaiDatTieuDe(); 
             taiDanhSachCongViec(); 
 
-        } catch (loi) { console.error("Lỗi khởi tạo:", loi); }
+        } catch (loi) { console.error("Loi khoi tao:", loi); }
     }
 
     async function taoAdminMacDinh() {
